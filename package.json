@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "optimize-images": "node scripts/optimize-images.mjs",
+    "build": "npm run optimize-images && vite build",
     "preview": "vite preview",
     "docs": "jsdoc src/js -d docs"
   },
@@ -13,5 +14,8 @@
     "jsdoc": "^4.0.5",
     "sass": "^1.97.3",
     "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
   }
 }
