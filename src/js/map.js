@@ -1,7 +1,25 @@
 "use strict"
 
-/* Allt som handlar om karta samlas här */
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
+/**
+ * Initierar Leaflet-kartan i #map.
+ * @returns {L.Map | null}
+ */
 export function initMap() {
-  console.log("Kart-modulen är med!");
+  const mapElement = document.getElementById('map');
+
+  if (!mapElement) {
+    return null;
+  }
+
+  const map = L.map(mapElement).setView([62.0, 15.0], 5);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  return map;
 }
