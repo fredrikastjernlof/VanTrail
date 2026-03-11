@@ -2,9 +2,9 @@
 import "../styles/main.scss";
 import { state } from "./state.js";
 import { initUI } from "./ui.js";
-import { initPOI } from "./poi.js";
 import { initWeather } from "./weather.js";
 
+import { fetchPOIs } from './poi.js';
 import { initMap, drawRoute } from './map.js';
 import { geocodePlace, fetchRoute } from './route.js';
 
@@ -45,6 +45,10 @@ form?.addEventListener('submit', async (event) => {
 
     /* Skickar datan vidare till map.js som ritar rutten på kartan */
     drawRoute(routeCoordinates);
+
+    const pois = await fetchPOIs(routeCoordinates);
+
+    console.log("POI längs rutten:", pois);
 
     statusMessage.textContent = 'Rutt hämtad.'; // Visar om allt gått som det ska
   } catch (error) {
