@@ -5,9 +5,9 @@
 export function initUI() {
   console.log("UI-modulen är med!");
 
-  const heading = document.querySelector("h1");
+  /*const heading = document.querySelector("h1");
 
   if (heading) {
     heading.textContent = "VanTrail";
-  }
+  }*/
 }
