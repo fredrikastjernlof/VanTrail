@@ -21,5 +21,10 @@ export function initMap() {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
+  L.marker([59.329, 18.0686])
+  .addTo(map)
+  .bindPopup('Testmarkör: Stockholm')
+  .openPopup();
+
   return map;
 }
