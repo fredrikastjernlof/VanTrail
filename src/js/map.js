@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 
 let map;
 let routeLayer;
+let poiLayers = [];
 
 /**
  * Initierar kartan.
@@ -53,4 +54,46 @@ export function drawRoute(coordinates) {
   routeLayer = L.polyline(latLngs).addTo(map);
   /* Zoomar kartan så att hela rutten syns */
   map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+}
+
+
+/**
+ * Ritar POI-markörer på kartan.
+ * @param {object[]} pois
+ */
+export function drawPOIs(pois) {
+  // Om kartan inte finns eller om listan är tom gör vi inget
+  if (!map || !pois?.length) {
+    return;
+  }
+
+  // Ta bort gamla POI-markörer från kartan
+  poiLayers.forEach((layer) => map.removeLayer(layer));
+  // Töm listan så vi kan fylla den igen
+  poiLayers = [];
+
+  // Loopa igenom alla POI som hämtats från Overpass
+  pois.forEach((poi) => {
+    // Node har lat/lon direkt, medan way får center.lat / center.lon
+    const lat = poi.lat ?? poi.center?.lat;
+    const lon = poi.lon ?? poi.center?.lon;
+
+    // Om koordinater saknas hoppar vi över detta POI
+    if (!lat || !lon) {
+      return;
+    }
+
+    // Hämta namn om det finns, annars visa standardtext
+    const name = poi.tags?.name || 'Namnlös plats';
+    // Hämta typ (amenity eller tourism)
+    const type = poi.tags?.amenity || poi.tags?.tourism || 'Okänd typ';
+
+    // Skapa markör och sätt ut den på kartan
+    const marker = L.marker([lat, lon])
+      .addTo(map)
+      .bindPopup(`${name}<br>${type}`);
+
+    // Spara markören så vi kan ta bort den senare
+    poiLayers.push(marker);
+  });
 }
