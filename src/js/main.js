@@ -4,7 +4,7 @@ import { state } from "./state.js";
 import { initUI } from "./ui.js";
 import { initWeather } from "./weather.js";
 
-import { fetchPOIs, normalizePOIs } from "./poi.js";
+import { fetchPOIs, normalizePOIs, groupPOIsByCategory } from "./poi.js";
 import { initMap, drawRoute, drawPOIs } from './map.js';
 import { geocodePlace, fetchRoute } from './route.js';
 
@@ -53,6 +53,10 @@ form?.addEventListener('submit', async (event) => {
     /* Normalisera stopp */
     const normalizedPOIs = normalizePOIs(rawPOIs);
     console.log("Normaliserade POI:", normalizedPOIs);
+
+    /* Gruppera stopp efter kategori så de senare kan visas i stopplistan */
+    const groupedPOIs = groupPOIsByCategory(normalizedPOIs);
+    console.log("Grupperade POI:", groupedPOIs);
 
     /* Rita stopp på kartan */
     drawPOIs(normalizedPOIs);

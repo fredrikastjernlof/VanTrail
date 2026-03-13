@@ -118,3 +118,22 @@ export function normalizePOIs(pois) {
     // Filtrera bort objekt utan användbara koordinater
   }).filter((poi) => poi.lat !== null && poi.lon !== null);
 }
+
+/**
+ * Grupperar normaliserade POI efter kategori.
+ * @param {object[]} pois
+ * @returns {Object<string, object[]>}
+ */
+export function groupPOIsByCategory(pois) {
+  return pois.reduce((groups, poi) => {
+    const category = poi.category || "Övrigt";
+
+    if (!groups[category]) {
+      groups[category] = [];
+    }
+
+    groups[category].push(poi);
+
+    return groups;
+  }, {});
+}
