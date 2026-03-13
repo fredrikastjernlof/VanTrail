@@ -70,8 +70,9 @@ export function openPOIModal(poi) {
   const type = document.getElementById("poi-type");
   const distance = document.getElementById("poi-distance");
   const navigateBtn = document.getElementById("navigate-btn");
+  const showOnMapBtn = document.getElementById("show-on-map-btn");
 
-  if (!modal || !title || !type || !distance || !navigateBtn) {
+  if (!modal || !title || !type || !distance || !navigateBtn || !showOnMapBtn) {
     return;
   }
 
@@ -82,6 +83,8 @@ export function openPOIModal(poi) {
   distance.textContent = "Kommer snart";
 
   navigateBtn.href = `https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lon}`;
+
+  showOnMapBtn.dataset.poiId = poi.id;
 
   modal.hidden = false;
 }
@@ -103,7 +106,7 @@ export function closePOIModal() {
  * Kopplar eventlyssnare i stopplistan till modal.
  * @param {object[]} pois
  */
-export function initPOIModalEvents(pois) {
+export function initPOIModalEvents(pois, onShowOnMap) {
   const container = document.getElementById("stops-groups");
   const modal = document.getElementById("poi-modal");
 
@@ -133,6 +136,26 @@ export function initPOIModalEvents(pois) {
 
     if (closeTarget) {
       closePOIModal();
+      return;
     }
+
+    const showOnMapBtn = event.target.closest("#show-on-map-btn");
+
+    if (!showOnMapBtn) {
+      return;
+    }
+
+    const poiId = showOnMapBtn.dataset.poiId;
+    const selectedPOI = pois.find((poi) => poi.id === poiId);
+
+    if (!selectedPOI) {
+      return;
+    }
+
+    if (typeof onShowOnMap === "function") {
+      onShowOnMap(selectedPOI);
+    }
+
+    closePOIModal();
   });
 }

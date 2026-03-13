@@ -5,7 +5,7 @@ import { state } from "./state.js";
 import { initWeather } from "./weather.js";
 
 import { fetchPOIs, normalizePOIs, groupPOIsByCategory } from "./poi.js";
-import { initMap, drawRoute, drawPOIs } from './map.js';
+import { initMap, drawRoute, drawPOIs, showPOIOnMap } from './map.js';
 import { geocodePlace, fetchRoute } from './route.js';
 import { renderStopsGroups, initPOIModalEvents } from "./ui.js";
 
@@ -66,7 +66,7 @@ form?.addEventListener('submit', async (event) => {
     renderStopsGroups(groupedPOIs);
 
     // Koppla klick i stopplistan till modalen
-    initPOIModalEvents(normalizedPOIs);
+    initPOIModalEvents(normalizedPOIs, showPOIOnMap);
 
     statusMessage.textContent = 'Rutt och stopp hämtade.'; // Visar om allt gått som det ska
 

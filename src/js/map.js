@@ -96,3 +96,32 @@ export function drawPOIs(pois) {
     poiLayers.push(marker);
   });
 }
+
+/**
+ * Zoomar till ett valt POI och öppnar dess popup.
+ * @param {object} poi
+ */
+export function showPOIOnMap(poi) {
+  if (!map || !poi) {
+    return;
+  }
+
+  const lat = poi.lat;
+  const lon = poi.lon;
+
+  if (lat == null || lon == null) {
+    return;
+  }
+
+  const matchingMarker = poiLayers.find((layer) => {
+    const markerLatLng = layer.getLatLng();
+
+    return markerLatLng.lat === lat && markerLatLng.lng === lon;
+  });
+
+  map.setView([lat, lon], 14);
+
+  if (matchingMarker) {
+    matchingMarker.openPopup();
+  }
+}
