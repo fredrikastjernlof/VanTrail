@@ -7,7 +7,7 @@ import { initWeather } from "./weather.js";
 import { fetchPOIs, normalizePOIs, groupPOIsByCategory } from "./poi.js";
 import { initMap, drawRoute, drawPOIs } from './map.js';
 import { geocodePlace, fetchRoute } from './route.js';
-import { renderStopsGroups } from "./ui.js";
+import { renderStopsGroups, initPOIModalEvents } from "./ui.js";
 
 /* Startar kartan direkt när sidan laddas */
 initMap();
@@ -64,6 +64,9 @@ form?.addEventListener('submit', async (event) => {
 
     // Rendera stopp i listan
     renderStopsGroups(groupedPOIs);
+
+    // Koppla klick i stopplistan till modalen
+    initPOIModalEvents(normalizedPOIs);
 
     statusMessage.textContent = 'Rutt och stopp hämtade.'; // Visar om allt gått som det ska
 

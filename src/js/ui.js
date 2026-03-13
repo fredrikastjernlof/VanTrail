@@ -59,3 +59,80 @@ export function renderStopsGroups(groupedPOIs) {
     container.appendChild(section);
   });
 }
+
+/**
+ * Öppnar modalen och fyller den med information om valt stopp.
+ * @param {object} poi
+ */
+export function openPOIModal(poi) {
+  const modal = document.getElementById("poi-modal");
+  const title = document.getElementById("poi-modal-title");
+  const type = document.getElementById("poi-type");
+  const distance = document.getElementById("poi-distance");
+  const navigateBtn = document.getElementById("navigate-btn");
+
+  if (!modal || !title || !type || !distance || !navigateBtn) {
+    return;
+  }
+
+  title.textContent = poi.name || "Namnlös plats";
+  type.textContent = poi.category || poi.type || "Okänd typ";
+
+  // Avstånd räknas ut senare
+  distance.textContent = "Kommer snart";
+
+  navigateBtn.href = `https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lon}`;
+
+  modal.hidden = false;
+}
+
+/**
+ * Stänger POI-modalen.
+ */
+export function closePOIModal() {
+  const modal = document.getElementById("poi-modal");
+
+  if (!modal) {
+    return;
+  }
+
+  modal.hidden = true;
+}
+
+/**
+ * Kopplar eventlyssnare i stopplistan till modal.
+ * @param {object[]} pois
+ */
+export function initPOIModalEvents(pois) {
+  const container = document.getElementById("stops-groups");
+  const modal = document.getElementById("poi-modal");
+
+  if (!container || !modal) {
+    return;
+  }
+
+  container.addEventListener("click", (event) => {
+    const button = event.target.closest(".stop-item__button");
+
+    if (!button) {
+      return;
+    }
+
+    const poiId = button.dataset.poiId;
+    const selectedPOI = pois.find((poi) => poi.id === poiId);
+
+    if (!selectedPOI) {
+      return;
+    }
+
+    openPOIModal(selectedPOI);
+  });
+
+  modal.addEventListener("click", (event) => {
+    const closeTarget = event.target.closest("[data-close-modal='true']");
+
+    if (closeTarget) {
+      closePOIModal();
+    }
+  });
+}
