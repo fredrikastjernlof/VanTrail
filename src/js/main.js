@@ -1,12 +1,13 @@
 "use strict";
 import "../styles/main.scss";
 import { state } from "./state.js";
-import { initUI } from "./ui.js";
+
 import { initWeather } from "./weather.js";
 
 import { fetchPOIs, normalizePOIs, groupPOIsByCategory } from "./poi.js";
 import { initMap, drawRoute, drawPOIs } from './map.js';
 import { geocodePlace, fetchRoute } from './route.js';
+import { renderStopsGroups } from "./ui.js";
 
 /* Startar kartan direkt när sidan laddas */
 initMap();
@@ -60,6 +61,9 @@ form?.addEventListener('submit', async (event) => {
 
     /* Rita stopp på kartan */
     drawPOIs(normalizedPOIs);
+
+    // Rendera stopp i listan
+    renderStopsGroups(groupedPOIs);
 
     statusMessage.textContent = 'Rutt och stopp hämtade.'; // Visar om allt gått som det ska
 
