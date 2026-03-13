@@ -4,7 +4,7 @@ import { state } from "./state.js";
 import { initUI } from "./ui.js";
 import { initWeather } from "./weather.js";
 
-import { fetchPOIs } from './poi.js';
+import { fetchPOIs, normalizePOIs } from "./poi.js";
 import { initMap, drawRoute, drawPOIs } from './map.js';
 import { geocodePlace, fetchRoute } from './route.js';
 
@@ -46,12 +46,19 @@ form?.addEventListener('submit', async (event) => {
     /* Skickar datan vidare till map.js som ritar rutten på kartan */
     drawRoute(routeCoordinates);
 
-    const pois = await fetchPOIs(routeCoordinates);
+    /* Hämta stopp */
+    const rawPOIs = await fetchPOIs(routeCoordinates);
+    console.log("Rå POI-data:", rawPOIs);
 
-    drawPOIs(pois);
+    /* Normalisera stopp */
+    const normalizedPOIs = normalizePOIs(rawPOIs);
+    console.log("Normaliserade POI:", normalizedPOIs);
+
+    /* Rita stopp på kartan */
+    drawPOIs(normalizedPOIs);
 
     statusMessage.textContent = 'Rutt och stopp hämtade.'; // Visar om allt gått som det ska
-    
+
   } catch (error) {
     //Om något går fel:
     console.error(error);

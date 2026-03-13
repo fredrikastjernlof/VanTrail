@@ -62,8 +62,8 @@ export function drawRoute(coordinates) {
  * @param {object[]} pois
  */
 export function drawPOIs(pois) {
-  // Om kartan inte finns eller om listan är tom gör vi inget
-  if (!map || !pois?.length) {
+  // Om kartan inte finns gör vi inget
+  if (!map) {
     return;
   }
 
@@ -72,28 +72,27 @@ export function drawPOIs(pois) {
   // Töm listan så vi kan fylla den igen
   poiLayers = [];
 
-  // Loopa igenom alla POI som hämtats från Overpass
-  pois.forEach((poi) => {
-    // Node har lat/lon direkt, medan way får center.lat / center.lon
-    const lat = poi.lat ?? poi.center?.lat;
-    const lon = poi.lon ?? poi.center?.lon;
+  // Om listan är tom efter rensning, avsluta
+  if (!pois?.length) {
+    return;
+  }
 
-    // Om koordinater saknas hoppar vi över detta POI
-    if (!lat || !lon) {
+  // Loopa igenom alla POI
+  pois.forEach((poi) => {
+    const lat = poi.lat;
+    const lon = poi.lon;
+
+    if (lat == null || lon == null) {
       return;
     }
 
-    // Hämta namn om det finns, annars visa standardtext
-    const name = poi.tags?.name || 'Namnlös plats';
-    // Hämta typ (amenity eller tourism)
-    const type = poi.tags?.amenity || poi.tags?.tourism || 'Okänd typ';
+    const name = poi.name || "Namnlös plats";
+    const type = poi.category || poi.type || "Okänd typ";
 
-    // Skapa markör och sätt ut den på kartan
     const marker = L.marker([lat, lon])
       .addTo(map)
       .bindPopup(`${name}<br>${type}`);
 
-    // Spara markören så vi kan ta bort den senare
     poiLayers.push(marker);
   });
 }
