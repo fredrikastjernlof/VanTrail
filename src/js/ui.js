@@ -86,6 +86,8 @@ export function openPOIModal(poi) {
   distance.textContent = "Kommer snart";
 
   navigateBtn.href = `https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lon}`;
+  navigateBtn.target = "_blank";
+  navigateBtn.rel = "noopener noreferrer";
 
   showOnMapBtn.dataset.poiId = poi.id;
 

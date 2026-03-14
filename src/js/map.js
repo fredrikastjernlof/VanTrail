@@ -93,7 +93,13 @@ export function drawPOIs(pois) {
 
     const marker = L.marker([lat, lon])
       .addTo(map)
-      .bindPopup(`${name}<br>${type}`);
+      .bindPopup(`
+        <strong>${name}</strong><br>
+        ${type}<br>
+        <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" rel="noopener noreferrer">
+          Navigera hit
+        </a>
+      `);
 
     /* Sparar markören med POI:ens id som nyckel */
     poiLayers.set(poi.id, marker);
