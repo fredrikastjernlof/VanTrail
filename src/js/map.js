@@ -5,7 +5,8 @@ import 'leaflet/dist/leaflet.css';
 
 let map;
 let routeLayer;
-let poiLayers = [];
+/* Sparar POI-markörer med poi.id som nyckel så att rätt markör lätt kan hittas senare */
+let poiLayers = new Map();
 
 /**
  * Initierar kartan.
@@ -52,6 +53,7 @@ export function drawRoute(coordinates) {
 
   /* Här ritas en linje mellan punkterna på kartan, linjen sparas i routeLayer så att den kan tas bort senare */
   routeLayer = L.polyline(latLngs).addTo(map);
+
   /* Zoomar kartan så att hela rutten syns */
   map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
 }
@@ -69,8 +71,8 @@ export function drawPOIs(pois) {
 
   // Ta bort gamla POI-markörer från kartan
   poiLayers.forEach((layer) => map.removeLayer(layer));
-  // Töm listan så vi kan fylla den igen
-  poiLayers = [];
+  // Töm samlingen så vi kan spara nya markörer för den aktuella sökningen
+  poiLayers.clear();
 
   // Om listan är tom efter rensning, avsluta
   if (!pois?.length) {
@@ -93,35 +95,33 @@ export function drawPOIs(pois) {
       .addTo(map)
       .bindPopup(`${name}<br>${type}`);
 
-    poiLayers.push(marker);
+    /* Sparar markören med POI:ens id som nyckel */
+    poiLayers.set(poi.id, marker);
   });
 }
 
 /**
- * Zoomar till ett valt POI och öppnar dess popup.
+ * Visar ett specifikt POI på kartan genom att zooma till markören
+ * och öppna dess popup.
  * @param {object} poi
  */
 export function showPOIOnMap(poi) {
+  // Om kartan eller POI saknas ska inget hända
   if (!map || !poi) {
     return;
   }
 
-  const lat = poi.lat;
-  const lon = poi.lon;
+  // Hämta rätt markör via poi.id
+  const marker = poiLayers.get(poi.id);
 
-  if (lat == null || lon == null) {
+  // Om ingen markör hittas ska funktionen avbrytas
+  if (!marker) {
     return;
   }
 
-  const matchingMarker = poiLayers.find((layer) => {
-    const markerLatLng = layer.getLatLng();
+  // Zooma till markören
+  map.setView([poi.lat, poi.lon], 14);
 
-    return markerLatLng.lat === lat && markerLatLng.lng === lon;
-  });
-
-  map.setView([lat, lon], 14);
-
-  if (matchingMarker) {
-    matchingMarker.openPopup();
-  }
+  // Öppna popup för den valda markören
+  marker.openPopup();
 }
