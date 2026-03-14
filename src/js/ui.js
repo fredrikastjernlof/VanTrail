@@ -35,11 +35,38 @@ export function renderStopsGroups(groupedPOIs) {
     // Skapar en rubrik för kategorin
     const heading = document.createElement("h3");
     heading.className = "stops-group__title";
-    heading.textContent = `${category} (${groupedPOIs[category].length})`;
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.className = "stops-group__toggle";
+
+    const icons = {
+      Toaletter: "🚻",
+      Tankstationer: "⛽",
+      "Mat & restauranger": "🍔",
+      "Ställplatser / camping": "🏕️",
+      Utsiktsplatser: "📷",
+      Övrigt: "📍"
+    };
+
+    const icon = icons[category] || "";
+
+    toggleBtn.textContent = `${icon} ${category} (${groupedPOIs[category].length})`;
+
+    heading.appendChild(toggleBtn);
+    toggleBtn.setAttribute("aria-expanded", "false");
 
     // Skapar en lista för stoppen i kategorin
     const list = document.createElement("ul");
     list.className = "stops-group__list";
+    list.hidden = true;
+
+    toggleBtn.addEventListener("click", () => {
+      const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
+
+      toggleBtn.setAttribute("aria-expanded", String(!isOpen));
+      list.hidden = isOpen;
+    });
 
     // Loopa igenom alla POI i den aktuella kategorin
     groupedPOIs[category].forEach((poi) => {

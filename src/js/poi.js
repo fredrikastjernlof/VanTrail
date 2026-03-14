@@ -82,14 +82,14 @@ function detectPoiType(tags = {}) {
  */
 function getPoiCategory(type) {
   const categoryMap = {
-    toilets: "Toalett",
-    restaurant: "Mat",
-    cafe: "Mat",
-    fast_food: "Mat",
-    fuel: "Bensin",
-    camp_site: "Camping",
-    caravan_site: "Camping",
-    viewpoint: "Utsikt",
+    toilets: "Toaletter",
+    restaurant: "Mat & restauranger",
+    cafe: "Mat & restauranger",
+    fast_food: "Mat & restauranger",
+    fuel: "Tankstationer",
+    camp_site: "Ställplatser / camping",
+    caravan_site: "Ställplatser / camping",
+    viewpoint: "Utsiktsplatser",
     other: "Övrigt"
   };
 

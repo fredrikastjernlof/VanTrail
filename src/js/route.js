@@ -13,8 +13,9 @@ export async function geocodePlace(query) {
   /* Skapar ett URL-objekt med grunden till geokodnings-endpointen och lägger till query-parametrar i URL:en */
   const url = new URL('https://api.openrouteservice.org/geocode/search');
   url.searchParams.set('api_key', API_KEY);
-  url.searchParams.set('text', query);
+  url.searchParams.set('text', `${query}, Sverige`);
   url.searchParams.set('size', '1');
+  url.searchParams.set('boundary.country', 'SE');
 
   /* Anropet skickas till API:t, inväntar ett response-objekt */
   const response = await fetch(url);
@@ -57,14 +58,16 @@ export async function fetchRoute(startCoords, endCoords) {
         'Content-Type': 'application/json' // Talar om att jag skickar JSON-data
       },
       /* Bygger ett JS-objekt och gör om det till JSON-text med JSON.stringify() */
-      body: JSON.stringify({ 
-        coordinates: [startCoords, endCoords] 
+      body: JSON.stringify({
+        coordinates: [startCoords, endCoords]
       })
     }
   );
 
   /* Avbryt om API:t inte svaradr korrekt */
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error("ORS-svar:", errorText);
     throw new Error('Kunde inte hämta rutten.');
   }
 
