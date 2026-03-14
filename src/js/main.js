@@ -19,6 +19,76 @@ const startInput = document.getElementById('start-input');
 const destinationInput = document.getElementById('destination-input');
 const statusMessage = document.getElementById('status-message');
 
+/* Sparar alla normaliserade POI från senaste sökningen */
+let currentPOIs = [];
+
+/* Hämtar filter-checkboxar */
+const filterToilets = document.getElementById("filter-toilets");
+const filterFood = document.getElementById("filter-food");
+const filterFuel = document.getElementById("filter-fuel");
+const filterCamping = document.getElementById("filter-camping");
+const filterViewpoints = document.getElementById("filter-viewpoints");
+
+/**
+ * Läser av vilka filter i 'Visa stopp längs vägen' som är aktiva just nu.
+ * @returns {object}
+ */
+function getActiveFilters() {
+  return {
+    toilets: filterToilets?.checked ?? false,
+    food: filterFood?.checked ?? false,
+    fuel: filterFuel?.checked ?? false,
+    camping: filterCamping?.checked ?? false,
+    viewpoints: filterViewpoints?.checked ?? false
+  };
+}
+
+/**
+ * Filtrerar POI utifrån vilka checkboxar som är aktiva.
+ * @param {object[]} pois
+ * @param {object} filters
+ * @returns {object[]}
+ */
+function filterPOIs(pois, filters) {
+  return pois.filter((poi) => {
+    if (poi.type === "toilets") {
+      return filters.toilets;
+    }
+
+    if (["restaurant", "cafe", "fast_food"].includes(poi.type)) {
+      return filters.food;
+    }
+
+    if (poi.type === "fuel") {
+      return filters.fuel;
+    }
+
+    if (["camp_site", "caravan_site"].includes(poi.type)) {
+      return filters.camping;
+    }
+
+    if (poi.type === "viewpoint") {
+      return filters.viewpoints;
+    }
+
+    /* Övriga typer visas som standard */
+    return true;
+  });
+}
+
+/**
+ * Uppdaterar karta och stopplista utifrån aktiva filter.
+ */
+function updateFilteredPOIView() {
+  const activeFilters = getActiveFilters();
+  const filteredPOIs = filterPOIs(currentPOIs, activeFilters);
+  const groupedPOIs = groupPOIsByCategory(filteredPOIs);
+
+  drawPOIs(filteredPOIs);
+  renderStopsGroups(groupedPOIs);
+}
+
+
 /* Om formuläret finns - lyssna på när det skickas, callbacken är async eftersom den ska använda await */
 form?.addEventListener('submit', async (event) => {
   /* Stoppar sidan från att laddas om automatiskt */
@@ -56,14 +126,13 @@ form?.addEventListener('submit', async (event) => {
     console.log("Normaliserade POI:", normalizedPOIs);
 
     /* Gruppera stopp efter kategori så de senare kan visas i stopplistan */
-    const groupedPOIs = groupPOIsByCategory(normalizedPOIs);
-    console.log("Grupperade POI:", groupedPOIs);
+    console.log("Grupperade POI:", groupPOIsByCategory(normalizedPOIs));
 
-    /* Rita stopp på kartan */
-    drawPOIs(normalizedPOIs);
+    /* Spara alla stopp från senaste sökningen */
+    currentPOIs = normalizedPOIs;
 
-    // Rendera stopp i listan
-    renderStopsGroups(groupedPOIs);
+    /* Uppdatera karta och stopplista utifrån valda filter */
+    updateFilteredPOIView();
 
     // Koppla klick i stopplistan till modalen
     initPOIModalEvents(normalizedPOIs, showPOIOnMap);
@@ -75,4 +144,17 @@ form?.addEventListener('submit', async (event) => {
     console.error(error);
     statusMessage.textContent = error.message || 'Något gick fel.';
   }
+});
+
+/* När användaren ändrar filter ska kartan och listan uppdateras direkt */
+[
+  filterToilets,
+  filterFood,
+  filterFuel,
+  filterCamping,
+  filterViewpoints
+].forEach((checkbox) => {
+  checkbox?.addEventListener("change", () => {
+    updateFilteredPOIView();
+  });
 });

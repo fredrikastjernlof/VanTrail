@@ -2,6 +2,9 @@
 
 /* Hä läggs kod som påverkar gränssnittet */
 
+// Förhindrar att event listeners registreras flera gånger
+let poiModalEventsInitialized = false;
+
 /**
  * Renderar grupperade stopp i stopplistan.
  * @param {Object<string, object[]>} groupedPOIs
@@ -107,6 +110,9 @@ export function closePOIModal() {
  * @param {object[]} pois
  */
 export function initPOIModalEvents(pois, onShowOnMap) {
+
+  if (poiModalEventsInitialized) return;
+
   const container = document.getElementById("stops-groups");
   const modal = document.getElementById("poi-modal");
 
@@ -134,28 +140,38 @@ export function initPOIModalEvents(pois, onShowOnMap) {
   modal.addEventListener("click", (event) => {
     const closeTarget = event.target.closest("[data-close-modal='true']");
 
+    /* Stäng modalen om användaren klickar på stäng-knappen */
     if (closeTarget) {
       closePOIModal();
       return;
     }
 
+    /* Kontrollera om användaren klickat på "Visa på kartan" */
     const showOnMapBtn = event.target.closest("#show-on-map-btn");
 
     if (!showOnMapBtn) {
       return;
     }
 
+    /* Hämta id för det POI som visas i modalen */
     const poiId = showOnMapBtn.dataset.poiId;
+
+    /* Hitta rätt POI i arrayen */
     const selectedPOI = pois.find((poi) => poi.id === poiId);
 
     if (!selectedPOI) {
       return;
     }
 
+    /* Kör callbacken som skickats in från main.js */
     if (typeof onShowOnMap === "function") {
       onShowOnMap(selectedPOI);
     }
 
+    /* Stäng modalen efter att kartan uppdaterats */
     closePOIModal();
   });
+
+  poiModalEventsInitialized = true;
+
 }
