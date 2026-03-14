@@ -104,6 +104,8 @@
 }
 
 .map {
+  position: relative; /* Gör att z-index kan styras */
+  z-index: 1; /* Kartan ska ligga under modalen */
   width: 100%;
   height: 500px;
   border: 1px solid #000;
@@ -125,11 +127,25 @@
 }
 
 .stops-group__toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
-  padding: 0.75rem 0;
+  padding: 0.75rem 0.5rem;
   border: 0;
   background: transparent;
   text-align: left;
+}
+
+.stops-group__toggle::after {
+  content: "▸";
+  margin-left: 0.5rem;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.stops-group__toggle[aria-expanded="true"]::after {
+  transform: rotate(90deg);
 }
 
 .stops-group__list {
@@ -151,6 +167,7 @@
 .modal {
   position: fixed;
   inset: 0;
+  z-index: 2000; /* Ser till att modalen alltid ligger ovanpå kartan */
 }
 
 .modal__overlay {
