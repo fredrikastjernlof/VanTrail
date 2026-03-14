@@ -2,6 +2,91 @@
 
 /* Här samlas funktioner för sevärdigheter och stopp */
 
+
+/**
+ * Räknar ut ungefärligt avstånd i kilometer mellan två koordinater.
+ * Använder Haversine-beräkning för sampling längs rutt.
+ *
+ * @param {[number, number]} pointA [lon, lat]
+ * @param {[number, number]} pointB [lon, lat]
+ * @returns {number}
+ */
+function getDistanceKm(pointA, pointB) {
+  /* Plockar ut longitud och latitud från punkt A och punkt B */
+  const [lon1, lat1] = pointA;
+  const [lon2, lat2] = pointB;
+
+  /* Hjälpfunktion: trigonometriska funktioner i JS använder radianer, inte grader */
+  const toRadians = (value) => (value * Math.PI) / 180;
+
+  /* Jordens ungefärliga radie i kilometer */
+  const earthRadiusKm = 6371;
+
+  /* Räknar ut skillnaden mellan punkterna i latitud och longitud */
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+
+  /* Första delen av formeln används för att ta hänsyn till att jorden är rund */
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(lat1)) *
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) ** 2;
+
+  /* Andra delen av formeln omvandlar mellanvärdet till ett vinkelavstånd på jordytan */
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  /* Slutligt avstånd i kilometer */
+  return earthRadiusKm * c;
+}
+
+
+/**
+ * Väljer ut stopp-punkter med jämnt avstånd längs rutten.
+ *
+ * @param {number[][]} routeCoords
+ * @param {number} sampleDistanceKm
+ * @returns {number[][]}
+ */
+function getSamplePointsByDistance(routeCoords, sampleDistanceKm) {
+  /* Om rutten saknar koordinater finns inga sample-punkter att välja */
+  if (!routeCoords?.length) {
+    return [];
+  }
+
+  /* Börja med ruttens första punkt */
+  const samplePoints = [routeCoords[0]];
+
+  /* Håller koll på hur långt vi rört oss sedan senaste valda stopp-punkt */
+  let distanceSinceLastSample = 0;
+
+  /* Gå igenom rutten punkt för punkt */
+  for (let index = 1; index < routeCoords.length; index++) {
+    const previousPoint = routeCoords[index - 1];
+    const currentPoint = routeCoords[index];
+
+    /* Lägg till avståndet mellan föregående och nuvarande punkt */
+    distanceSinceLastSample += getDistanceKm(previousPoint, currentPoint);
+
+    /* När vi nått önskat avstånd sparas punkten som ny stopp-punkt och räknaren börjar om */
+    if (distanceSinceLastSample >= sampleDistanceKm) {
+      samplePoints.push(currentPoint);
+      distanceSinceLastSample = 0;
+    }
+  }
+
+  const lastPoint = routeCoords[routeCoords.length - 1];
+  const lastSample = samplePoints[samplePoints.length - 1];
+
+  /* Säkerställ att även ruttens slut kommer med som stopp-punkt */
+  if (lastSample !== lastPoint) {
+    samplePoints.push(lastPoint);
+  }
+
+  return samplePoints;
+}
+
+
 /**
  * Hämtar POI nära en lista av koordinater.
  * @param {number[][]} routeCoords
@@ -11,11 +96,11 @@ export async function fetchPOIs(routeCoords) {// Funktionen tar emot routeCoords
   if (!routeCoords?.length) {
     return [];
   }
-  /* För att undvika extremt stora Overpass-frågor begränsas antal sökpunkter längs rutten 
-  till max 50. */
-  const maxSamples = 50;
-  const step = Math.max(1, Math.ceil(routeCoords.length / maxSamples));
-  const samplePoints = routeCoords.filter((_, index) => index % step === 0);
+
+
+  /* Ett ungefärligt sökområde var 8:e km längs rutten */
+  const sampleDistanceKm = 8;
+  const samplePoints = getSamplePointsByDistance(routeCoords, sampleDistanceKm);
 
   console.log("Antal routeCoords:", routeCoords.length);
   console.log("Antal samplePoints:", samplePoints.length);
@@ -29,6 +114,7 @@ export async function fetchPOIs(routeCoords) {// Funktionen tar emot routeCoords
   way(around:1000,${lat},${lon})["tourism"~"camp_site|caravan_site|viewpoint"];
 ` );
 
+
   /* Gör "en stor fråga av alla små frågor" */
   const overpassQuery = `
   [out:json][timeout:25];
@@ -37,6 +123,7 @@ export async function fetchPOIs(routeCoords) {// Funktionen tar emot routeCoords
     );
     out center;
   `;
+
 
   /* Skickar förfrågan till Overpass */
   const response = await fetch('https://overpass-api.de/api/interpreter', {
@@ -50,6 +137,7 @@ export async function fetchPOIs(routeCoords) {// Funktionen tar emot routeCoords
 
   const data = await response.json();
 
+  /* Ta bort dubletter eftersom samma stopp kan hittas från flera stopp-punkter */
   const uniquePOIs = data.elements.filter((element, index, array) => {
     return index === array.findIndex((item) => item.id === element.id);
   });
@@ -119,6 +207,60 @@ export function normalizePOIs(pois) {
   }).filter((poi) => poi.lat !== null && poi.lon !== null);
 }
 
+/*=============================================================================*/
+
+
+/**
+ * Sorterar POI i den ordning de ligger längs rutten.
+ * Närmaste punkt i routeCoords används som ungefärlig position.
+ *
+ * @param {object[]} pois
+ * @param {number[][]} routeCoords
+ * @returns {object[]}
+ */
+export function sortPOIsAlongRoute(pois, routeCoords) {
+  if (!pois?.length || !routeCoords?.length) {
+    return pois;
+  }
+
+  return [...pois].sort((a, b) => {
+    const aIndex = getClosestRouteIndex(a, routeCoords);
+    const bIndex = getClosestRouteIndex(b, routeCoords);
+
+    return aIndex - bIndex;
+  });
+}
+
+/**
+ * Hittar index för den punkt i rutten som ligger närmast ett POI.
+ *
+ * @param {object} poi
+ * @param {number[][]} routeCoords
+ * @returns {number}
+ */
+function getClosestRouteIndex(poi, routeCoords) {
+  let closestIndex = 0;
+  let closestDistance = Infinity;
+
+  routeCoords.forEach(([lon, lat], index) => {
+    const distance =
+      Math.abs(lat - poi.lat) + Math.abs(lon - poi.lon);
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestIndex = index;
+    }
+  });
+
+  return closestIndex;
+}
+
+
+/*=============================================================================*/
+
+
+
+
 /**
  * Grupperar normaliserade POI efter kategori.
  * @param {object[]} pois
@@ -139,8 +281,7 @@ export function groupPOIsByCategory(pois) {
 }
 
 /**
- * Begränsar antal POI som visas per kategori.
- *
+ * Begränsar antal POI per kategori.
  * @param {Object<string, object[]>} groupedPOIs
  * @param {number} maxPerCategory
  * @returns {Object<string, object[]>}
