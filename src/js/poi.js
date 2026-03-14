@@ -137,3 +137,19 @@ export function groupPOIsByCategory(pois) {
     return groups;
   }, {});
 }
+
+/**
+ * Begränsar antal POI som visas per kategori.
+ *
+ * @param {Object<string, object[]>} groupedPOIs
+ * @param {number} maxPerCategory
+ * @returns {Object<string, object[]>}
+ */
+export function limitPOIsPerCategory(groupedPOIs, maxPerCategory) {
+  return Object.fromEntries(
+    Object.entries(groupedPOIs).map(([category, pois]) => [
+      category,
+      pois.slice(0, maxPerCategory)
+    ])
+  );
+}

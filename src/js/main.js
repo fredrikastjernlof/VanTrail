@@ -4,7 +4,7 @@ import { state } from "./state.js";
 
 import { initWeather } from "./weather.js";
 
-import { fetchPOIs, normalizePOIs, groupPOIsByCategory } from "./poi.js";
+import { fetchPOIs, normalizePOIs, groupPOIsByCategory, limitPOIsPerCategory } from "./poi.js";
 import { initMap, drawRoute, drawPOIs, showPOIOnMap } from './map.js';
 import { geocodePlace, fetchRoute } from './route.js';
 import { renderStopsGroups, initPOIModalEvents } from "./ui.js";
@@ -18,6 +18,7 @@ const form = document.getElementById('route-form');
 const startInput = document.getElementById('start-input');
 const destinationInput = document.getElementById('destination-input');
 const statusMessage = document.getElementById('status-message');
+const visibleCountSelect = document.getElementById("visible-count");
 
 /* Sparar alla normaliserade POI från senaste sökningen */
 let currentPOIs = [];
@@ -84,8 +85,12 @@ function updateFilteredPOIView() {
   const filteredPOIs = filterPOIs(currentPOIs, activeFilters);
   const groupedPOIs = groupPOIsByCategory(filteredPOIs);
 
-  drawPOIs(filteredPOIs);
-  renderStopsGroups(groupedPOIs);
+  const maxPerCategory = Number(visibleCountSelect?.value || 10);
+  const limitedGroupedPOIs = limitPOIsPerCategory(groupedPOIs, maxPerCategory);
+  const limitedPOIs = Object.values(limitedGroupedPOIs).flat();
+
+  drawPOIs(limitedPOIs);
+  renderStopsGroups(limitedGroupedPOIs);
 }
 
 
@@ -157,4 +162,9 @@ form?.addEventListener('submit', async (event) => {
   checkbox?.addEventListener("change", () => {
     updateFilteredPOIView();
   });
+});
+
+/* Ändra antal visningar i listan */
+visibleCountSelect?.addEventListener("change", () => {
+  updateFilteredPOIView();
 });
