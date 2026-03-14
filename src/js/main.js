@@ -19,6 +19,7 @@ const startInput = document.getElementById('start-input');
 const destinationInput = document.getElementById('destination-input');
 const statusMessage = document.getElementById('status-message');
 const visibleCountSelect = document.getElementById("visible-count");
+const useLocationBtn = document.getElementById("use-location-btn");
 
 /* Sparar alla normaliserade POI från senaste sökningen */
 let currentPOIs = [];
@@ -93,6 +94,37 @@ function updateFilteredPOIView() {
   renderStopsGroups(limitedGroupedPOIs);
 }
 
+/* Hämtar användarens position när man klickar på knappen */
+useLocationBtn?.addEventListener("click", () => {
+  /* Kontrollerar att geolocation finns */
+  if (!navigator.geolocation) {
+    statusMessage.textContent = "Din webbläsare stödjer inte geolocation.";
+    return;
+  }
+
+  statusMessage.textContent = "Hämtar din position...";
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      /* Hämta lat/lon från webbläsaren */
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      /* Spara i state i formatet [lon, lat] */
+      state.userPosition = [lon, lat];
+
+      /* Skriv in i startfältet så användaren ser vad som valts */
+      startInput.value = "Min position";
+
+      console.log("Användarens position:", state.userPosition);
+      statusMessage.textContent = "Din position hämtades.";
+    },
+    (error) => {
+      console.error("Fel vid hämtning av position:", error);
+      statusMessage.textContent = "Kunde inte hämta din position.";
+    }
+  );
+});
 
 /* Om formuläret finns - lyssna på när det skickas, callbacken är async eftersom den ska använda await */
 form?.addEventListener('submit', async (event) => {
@@ -112,8 +144,10 @@ form?.addEventListener('submit', async (event) => {
   try {
     statusMessage.textContent = 'Hämtar rutt...'; // Visar status för användaren
 
-    /* Använder funktionen från route.js, inväntar svar (await) innan vi går vidare  */
-    const startCoords = await geocodePlace(start);
+    const startCoords = start === "Min position" && state.userPosition
+        ? state.userPosition
+        : await geocodePlace(start);
+
     const endCoords = await geocodePlace(destination);
 
     /* Hämtar rutten mellan de två punkterna */
