@@ -137,4 +137,64 @@ export function showPOIOnMap(poi) {
   marker.openPopup();
 }
 
+/*=========== SOLSIDAN ============*/
 
+/**
+ * Ritar ut solplatser som markörer på kartan.
+ *
+ * @param {object[]} places
+ */
+export function drawSunnyPlaces(places) {
+  if (!map) {
+    console.log("Ingen karta finns att rita på");
+    return;
+  }
+
+  /* Ta bort gamla markörer */
+  poiLayers.forEach((layer) => map.removeLayer(layer));
+  poiLayers.clear();
+
+  if (!places?.length) {
+    console.log("Inga solplatser att rita ut");
+    return;
+  }
+
+  places.forEach((place) => {
+    const marker = L.marker([place.lat, place.lon])
+      .addTo(map)
+      .bindPopup(`
+        <strong>${place.name}</strong><br>
+        ${place.weatherLabel}<br>
+        ${place.temperature}°C
+      `);
+
+    poiLayers.set(place.id, marker);
+  });
+
+  console.log("Solmarkörer ritades ut");
+}
+
+
+/**
+ * Zoomar till en vald solplats på kartan.
+ *
+ * @param {object} place
+ */
+export function showSunnyPlaceOnMap(place) {
+  if (!map || !place) {
+    console.log("Kunde inte visa plats på kartan");
+    return;
+  }
+
+  const marker = poiLayers.get(place.id);
+
+  if (!marker) {
+    console.log("Hittade ingen markör för vald plats");
+    return;
+  }
+
+  map.setView([place.lat, place.lon], 10);
+  marker.openPopup();
+
+  console.log("Visar plats på kartan:", place.name);
+}

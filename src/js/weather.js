@@ -1,7 +1,7 @@
 "use strict";
 
 import { state } from "./state.js";
-import { initMap } from "./map.js";
+import { initMap, drawSunnyPlaces, showSunnyPlaceOnMap } from "./map.js";
 
 /* Här samlas sånt som rör väder */
 
@@ -35,49 +35,144 @@ function getUserPosition() {
   });
 }
 
-
 /**
- * Skapar testplatser runt en startpunkt.
+ * Skapar kandidatplatser runt en startpunkt.
  *
- * @param {[number, number]} center 
- * @param {number} radiusKm 
+ * @param {[number, number]} center
+ * @param {number} radiusKm
  * @returns {object[]}
  */
 function generateCandidatePlaces(center, radiusKm) {
   const [centerLon, centerLat] = center;
+  const places = [];
 
-  /* Tillfälliga testplatser */
-  const places = [
-    {
-      id: "sun-1",
-      name: "Malmköping",
-      lon: centerLon + 0.18,
-      lat: centerLat + 0.08,
-      weatherLabel: "Soligt",
-      temperature: 17,
-      distanceText: "122 km"
-    },
-    {
-      id: "sun-2",
-      name: "Mariefred",
-      lon: centerLon + 0.10,
-      lat: centerLat - 0.06,
-      weatherLabel: "Lätt molnighet",
-      temperature: 16,
-      distanceText: "96 km"
-    },
-    {
-      id: "sun-3",
-      name: "Strängnäs",
-      lon: centerLon - 0.12,
-      lat: centerLat + 0.04,
-      weatherLabel: "Klar himmel",
-      temperature: 18,
-      distanceText: "88 km"
-    }
-  ];
+  /* Punkt nära användaren */
+  places.push({
+    id: "sun-center",
+    name: "Nära dig",
+    lon: centerLon,
+    lat: centerLat
+  });
 
+  /* Generera punkter i en cirkel runt användaren */
+  const count = 12;
+
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const distanceKm = radiusKm * 0.75;
+
+    const latOffset = (distanceKm / 111) * Math.cos(angle);
+    const lonOffset =
+      (distanceKm / (111 * Math.cos((centerLat * Math.PI) / 180))) * Math.sin(angle);
+
+    places.push({
+      id: `sun-${i + 1}`,
+      name: `Solplats ${i + 1}`,
+      lon: centerLon + lonOffset,
+      lat: centerLat + latOffset
+    });
+  }
+
+  console.log("Genererade kandidatplatser:", places);
   return places;
+}
+
+/**
+ * Räknar ut avstånd i km mellan två punkter.
+ *
+ * @param {[number, number]} pointA
+ * @param {[number, number]} pointB
+ * @returns {number}
+ */
+function getDistanceKm(pointA, pointB) {
+  const [lon1, lat1] = pointA;
+  const [lon2, lat2] = pointB;
+
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(lat1)) *
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) ** 2;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return earthRadiusKm * c;
+}
+
+/**
+ * Returnerar en enkel vädertext utifrån API-data.
+ *
+ * @param {number} weatherCode
+ * @param {number} cloudCover
+ * @param {number} precipitation
+ * @returns {string}
+ */
+function getWeatherLabel(weatherCode, cloudCover, precipitation) {
+  if (precipitation > 0.2) return "Nederbörd";
+  if (weatherCode === 0) return "Klar himmel";
+  if (cloudCover <= 25) return "Soligt";
+  if (cloudCover <= 50) return "Lätt molnighet";
+  return "Molnigt";
+}
+
+/**
+ * Avgör om vädret räknas som fint.
+ *
+ * @param {object} weather
+ * @returns {boolean}
+ */
+function isGoodWeather(weather) {
+  return (
+    weather.is_day === 1 &&
+    weather.precipitation <= 0.2 &&
+    weather.cloud_cover <= 50
+  );
+}
+
+/**
+ * Hämtar väderdata för en plats från Open-Meteo.
+ *
+ * @param {object} place
+ * @returns {Promise<object>}
+ */
+async function fetchWeatherForPlace(place) {
+  const url = new URL("https://api.open-meteo.com/v1/forecast");
+
+  url.searchParams.set("latitude", place.lat);
+  url.searchParams.set("longitude", place.lon);
+  url.searchParams.set(
+    "current",
+    "temperature_2m,precipitation,cloud_cover,weather_code,is_day"
+  );
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Kunde inte hämta väderdata.");
+  }
+
+  const data = await response.json();
+  const current = data.current;
+
+  return {
+    ...place,
+    temperature: current.temperature_2m,
+    precipitation: current.precipitation,
+    cloud_cover: current.cloud_cover,
+    weather_code: current.weather_code,
+    is_day: current.is_day,
+    weatherLabel: getWeatherLabel(
+      current.weather_code,
+      current.cloud_cover,
+      current.precipitation
+    )
+  };
 }
 
 /**
@@ -148,8 +243,8 @@ function openSunModal(place) {
   /* Fyller modalen med data för vald plats */
   title.textContent = place.name || "Namnlös plats";
   weather.textContent = place.weatherLabel || "Soligt";
-  temperature.textContent = place.temperature ?? "Okänd";
-  distance.textContent = place.distanceText || "Kommer snart";
+  temperature.textContent = place.temperature !== undefined ? `${place.temperature} °C` : "Okänd";
+  distance.textContent = place.distanceKm !== undefined ? `${Math.round(place.distanceKm)} km` : "Okänt";
 
   /* Spara vilket place-id som hör till knappen */
   showOnMapBtn.dataset.placeId = place.id;
@@ -227,7 +322,6 @@ function initSunModalEvents(onShowOnMap) {
 }
 
 
-
 /**
  * Startar funktionalitet för solsidan.
  */
@@ -249,7 +343,7 @@ export function initWeather() {
 
   /* Kopplar modalens knappar */
   initSunModalEvents((place) => {
-    console.log("Här visas platsen på kartan:", place);
+    showSunnyPlaceOnMap(place);
   });
 
   /* Klick på 'Hämta min position' */
@@ -291,16 +385,39 @@ export function initWeather() {
         startCoords = [15.0, 59.0];
       }
 
-      statusMessage.textContent = "Genererar testplatser...";
+      statusMessage.textContent = "Söker efter soligt väder...";
 
-      const places = generateCandidatePlaces(startCoords, radiusKm);
+      /* Generera kandidatplatser runt startpunkten */
+      const candidates = generateCandidatePlaces(startCoords, radiusKm);
 
-      /* Spara tillfälligt i state så de kan användas i nästa block */
-      state.weatherData = places;
+      /* Hämta väder för alla kandidatplatser */
+      const weatherResults = await Promise.all(
+        candidates.map((place) => fetchWeatherForPlace(place))
+      );
 
-      renderSunResultsList(places);
+      console.log("Väderresultat:", weatherResults);
 
-      statusMessage.textContent = `${places.length} testplatser skapades.`;
+      /* Filtrera ut platser med fint väder */
+      const sunnyPlaces = weatherResults
+        .filter(isGoodWeather)
+        .map((place) => ({
+          ...place,
+          distanceKm: getDistanceKm(startCoords, [place.lon, place.lat])
+        }))
+        .sort((a, b) => a.distanceKm - b.distanceKm);
+
+      console.log("Filtrerade solplatser:", sunnyPlaces);
+
+      /* Spara i state */
+      state.weatherData = sunnyPlaces;
+
+      /* Uppdatera UI */
+      drawSunnyPlaces(sunnyPlaces);
+      renderSunResultsList(sunnyPlaces);
+
+      statusMessage.textContent = sunnyPlaces.length
+        ? `${sunnyPlaces.length} soliga platser hittades.`
+        : "Ingen tydligt solig plats hittades just nu.";
     } catch (error) {
       console.error("Fel vid submit:", error);
       statusMessage.textContent = error.message || "Något gick fel.";
