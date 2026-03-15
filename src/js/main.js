@@ -1,17 +1,8 @@
 "use strict";
 import "../styles/main.scss";
 import { state } from "./state.js";
-
 import { initWeather } from "./weather.js";
-
-/* import { fetchPOIs, normalizePOIs, groupPOIsByCategory, limitPOIsPerCategory } from "./poi.js"; */
-import {
-  fetchPOIs,
-  normalizePOIs,
-  groupPOIsByCategory,
-  limitPOIsPerCategory,
-  getDistanceFromRouteKm
-} from "./poi.js";
+import { fetchPOIs, normalizePOIs, groupPOIsByCategory, limitPOIsPerCategory, getDistanceFromRouteKm} from "./poi.js";
 import { initMap, drawRoute, drawPOIs, showPOIOnMap } from './map.js';
 import { geocodePlace, fetchRoute } from './route.js';
 import { renderStopsGroups, initPOIModalEvents } from "./ui.js";
@@ -188,7 +179,7 @@ form?.addEventListener('submit', async (event) => {
     }
 
     /* Gruppera stopp efter kategori så de senare kan visas i stopplistan */
-    console.log("Grupperade POI:",groupPOIsByCategory(normalizedPOIsWithDistance));
+    console.log("Grupperade POI:", groupPOIsByCategory(normalizedPOIsWithDistance));
 
     /* Spara alla stopp från senaste sökningen */
     currentPOIs = normalizedPOIsWithDistance;
@@ -196,8 +187,8 @@ form?.addEventListener('submit', async (event) => {
     /* Uppdatera karta och stopplista utifrån valda filter */
     updateFilteredPOIView();
 
-    // Koppla klick i stopplistan till modalen
-    initPOIModalEvents(normalizedPOIs, showPOIOnMap);
+    /* Koppla klick i stopplistan till modalen med POI som redan har ruttavstånd */
+    initPOIModalEvents(normalizedPOIsWithDistance, showPOIOnMap);
 
     statusMessage.textContent = 'Rutt och stopp hämtade.'; // Visar om allt gått som det ska
 

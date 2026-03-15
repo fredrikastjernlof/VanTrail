@@ -109,8 +109,19 @@ export function openPOIModal(poi) {
   title.textContent = poi.name || "Namnlös plats";
   type.textContent = poi.category || poi.type || "Okänd typ";
 
-  // Avstånd räknas ut senare
-  distance.textContent = "Kommer snart";
+  console.log("POI i modal:", poi);
+
+  /* Visa avstånd från rutten i meter eller kilometer */
+  if (typeof poi.distanceFromRouteKm === "number") {
+    if (poi.distanceFromRouteKm < 1) {
+      const meters = Math.round(poi.distanceFromRouteKm * 1000);
+      distance.textContent = `${meters} m från rutten`;
+    } else {
+      distance.textContent = `${poi.distanceFromRouteKm.toFixed(1)} km från rutten`;
+    }
+  } else {
+    distance.textContent = "Avstånd okänt";
+  }
 
   navigateBtn.href = `https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lon}`;
   navigateBtn.target = "_blank";
