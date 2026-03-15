@@ -98,14 +98,63 @@
   box-shadow: var(--shadow-btn);
 }
 
+/*=====TEMASIDAN=====*/
+
+.btn--theme {
+  min-width: 10rem;
+  border-width: 2px;
+}
+
+
+/* Skog */
+.btn--theme-forest {
+  background-color: #4A7253;
+  border-color: #204523;
+  color: #ffffff;
+}
+
+/* Solnedgång */
+.btn--theme-sunset {
+  background-color: #F4AF19;
+  border-color: #D69200;
+  color: #000000;
+}
+
+/* Hav */
+.btn--theme-ocean {
+  background-color: #315186;
+  border-color: #01304F;
+  color: #ffffff;
+}
+
+.theme-selector {
+  margin-top: var(--space-xl);
+  text-align: center;
+}
+
+.theme-selector h1 {
+  margin-bottom: var(--space-md);
+}
+
+.theme-selector__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/*===================*/
+
 .status-message {
   min-height: 1.5rem;
   margin-top: var(--space-sm);
 }
 
 .map {
-  position: relative; /* Gör att z-index kan styras */
-  z-index: 1; /* Kartan ska ligga under modalen */
+  position: relative;
+  /* Gör att z-index kan styras */
+  z-index: 1;
+  /* Kartan ska ligga under modalen */
   width: 100%;
   height: 500px;
   border: 1px solid #000;
@@ -167,7 +216,8 @@
 .modal {
   position: fixed;
   inset: 0;
-  z-index: 2000; /* Ser till att modalen alltid ligger ovanpå kartan */
+  z-index: 2000;
+  /* Ser till att modalen alltid ligger ovanpå kartan */
 }
 
 .modal__overlay {
