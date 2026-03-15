@@ -4,7 +4,14 @@ import { state } from "./state.js";
 
 import { initWeather } from "./weather.js";
 
-import { fetchPOIs, normalizePOIs, groupPOIsByCategory, limitPOIsPerCategory } from "./poi.js";
+/* import { fetchPOIs, normalizePOIs, groupPOIsByCategory, limitPOIsPerCategory } from "./poi.js"; */
+import {
+  fetchPOIs,
+  normalizePOIs,
+  groupPOIsByCategory,
+  limitPOIsPerCategory,
+  getDistanceFromRouteKm
+} from "./poi.js";
 import { initMap, drawRoute, drawPOIs, showPOIOnMap } from './map.js';
 import { geocodePlace, fetchRoute } from './route.js';
 import { renderStopsGroups, initPOIModalEvents } from "./ui.js";
@@ -146,8 +153,8 @@ form?.addEventListener('submit', async (event) => {
     statusMessage.textContent = 'Hämtar rutt...'; // Visar status för användaren
 
     const startCoords = start === "Min position" && state.userPosition
-        ? state.userPosition
-        : await geocodePlace(start);
+      ? state.userPosition
+      : await geocodePlace(start);
 
     const endCoords = await geocodePlace(destination);
 
@@ -164,6 +171,13 @@ form?.addEventListener('submit', async (event) => {
     /* Normalisera stopp */
     const normalizedPOIs = normalizePOIs(rawPOIs);
     console.log("Normaliserade POI:", normalizedPOIs);
+
+    /* Test: räkna ut avstånd från första stoppet till rutten */
+    if (normalizedPOIs.length > 0) {
+      const testDistance = getDistanceFromRouteKm(normalizedPOIs[0], routeCoordinates);
+
+      console.log("Test - avstånd från första stoppet till rutten:", testDistance);
+    }
 
     /* Gruppera stopp efter kategori så de senare kan visas i stopplistan */
     console.log("Grupperade POI:", groupPOIsByCategory(normalizedPOIs));

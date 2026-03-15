@@ -40,6 +40,36 @@ function getDistanceKm(pointA, pointB) {
   return earthRadiusKm * c;
 }
 
+/**
+ * Räknar ut minsta avstånd i kilometer mellan ett POI och en rutt.
+ * Jämför POI:t med alla koordinatpunkter i rutten och tar det minsta värdet.
+ *
+ * @param {object} poi
+ * @param {number[][]} routeCoords 
+ * @returns {number}
+ */
+export function getDistanceFromRouteKm(poi, routeCoords) {
+  /* Om POI eller rutt saknas går det inte att räkna */
+  if (!poi || !routeCoords?.length) {
+    return Infinity;
+  }
+
+  /* Startvärde: väldigt stort tal så att första riktiga avståndet blir mindre */
+  let shortestDistanceKm = Infinity;
+
+  /* Gå igenom varje punkt i rutten */
+  routeCoords.forEach((routePoint) => {
+    const distanceKm = getDistanceKm([poi.lon, poi.lat], routePoint);
+
+    /* Spara bara det kortaste avståndet */
+    if (distanceKm < shortestDistanceKm) {
+      shortestDistanceKm = distanceKm;
+    }
+  });
+
+  return shortestDistanceKm;
+}
+
 
 /**
  * Väljer ut stopp-punkter med jämnt avstånd längs rutten.
