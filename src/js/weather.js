@@ -24,8 +24,6 @@ function getUserPosition() {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
 
-        console.log("Hämtad position:", { lat, lon });
-
         /* Spara som [lon, lat] */
         resolve([lon, lat]);
       },
@@ -50,13 +48,34 @@ function generateCandidatePlaces(center, radiusKm) {
 
   /* Tillfälliga testplatser */
   const places = [
-    { id: "sun-1", name: "Malmköping", lon: centerLon + 0.18, lat: centerLat + 0.08 },
-    { id: "sun-2", name: "Mariefred", lon: centerLon + 0.10, lat: centerLat - 0.06 },
-    { id: "sun-3", name: "Strängnäs", lon: centerLon - 0.12, lat: centerLat + 0.04 }
+    {
+      id: "sun-1",
+      name: "Malmköping",
+      lon: centerLon + 0.18,
+      lat: centerLat + 0.08,
+      weatherLabel: "Soligt",
+      temperature: 17,
+      distanceText: "122 km"
+    },
+    {
+      id: "sun-2",
+      name: "Mariefred",
+      lon: centerLon + 0.10,
+      lat: centerLat - 0.06,
+      weatherLabel: "Lätt molnighet",
+      temperature: 16,
+      distanceText: "96 km"
+    },
+    {
+      id: "sun-3",
+      name: "Strängnäs",
+      lon: centerLon - 0.12,
+      lat: centerLat + 0.04,
+      weatherLabel: "Klar himmel",
+      temperature: 18,
+      distanceText: "88 km"
+    }
   ];
-
-  console.log("Genererade testplatser:", places);
-  console.log("Vald radie i km:", radiusKm);
 
   return places;
 }
@@ -78,12 +97,12 @@ function renderSunResultsList(places) {
   list.innerHTML = "";
 
   if (!places.length) {
-    list.innerHTML = "<li>Inga platser hittades.</li>";
+    list.innerHTML = "<p>Inga platser hittades.</p>";
     return;
   }
 
   places.forEach((place) => {
-    const item = document.createElement("li");
+    const item = document.createElement("article");
     item.className = "sun-result-item";
 
     const button = document.createElement("button");
@@ -91,11 +110,12 @@ function renderSunResultsList(places) {
     button.className = "sun-result-button";
     button.dataset.placeId = place.id;
 
+
     button.innerHTML = `<span>${place.name}</span>`;
 
-    /* Tillfälligt klickbeteende i detta block */
     button.addEventListener("click", () => {
       console.log("Klick på plats i listan:", place);
+      openSunModal(place);
     });
 
     item.appendChild(button);
@@ -103,6 +123,107 @@ function renderSunResultsList(places) {
   });
 
   console.log("Resultatlista renderad");
+}
+
+
+/**
+ * Öppnar sol-modalen och fyller den med data om vald plats.
+ *
+ * @param {object} place
+ */
+function openSunModal(place) {
+  const modal = document.getElementById("sun-modal");
+  const title = document.getElementById("sun-modal-title");
+  const weather = document.getElementById("sun-weather");
+  const temperature = document.getElementById("sun-temperature");
+  const distance = document.getElementById("sun-distance");
+  const showOnMapBtn = document.getElementById("sun-show-on-map-btn");
+  const navigateBtn = document.getElementById("sun-navigate-btn");
+
+  if (!modal || !title || !weather || !temperature || !distance || !showOnMapBtn || !navigateBtn) {
+    console.log("Kunde inte öppna modalen - element saknas");
+    return;
+  }
+
+  /* Fyller modalen med data för vald plats */
+  title.textContent = place.name || "Namnlös plats";
+  weather.textContent = place.weatherLabel || "Soligt";
+  temperature.textContent = place.temperature ?? "Okänd";
+  distance.textContent = place.distanceText || "Kommer snart";
+
+  /* Spara vilket place-id som hör till knappen */
+  showOnMapBtn.dataset.placeId = place.id;
+
+  /* Google Maps-länk */
+  navigateBtn.href = `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}`;
+  navigateBtn.target = "_blank";
+  navigateBtn.rel = "noopener noreferrer";
+
+  modal.hidden = false;
+
+  console.log("Modal öppnad för:", place);
+}
+
+/**
+ * Stänger sol-modalen.
+ */
+function closeSunModal() {
+  const modal = document.getElementById("sun-modal");
+
+  if (!modal) {
+    return;
+  }
+
+  modal.hidden = true;
+  console.log("Modal stängd");
+}
+
+/**
+ * Kopplar event till sol-modalen.
+ * Körs en gång när solsidan startar.
+ *
+ * @param {Function} onShowOnMap
+ */
+function initSunModalEvents(onShowOnMap) {
+  const modal = document.getElementById("sun-modal");
+
+  if (!modal) {
+    console.log("Ingen sol-modal hittades");
+    return;
+  }
+
+  modal.addEventListener("click", (event) => {
+    const closeTarget = event.target.closest("[data-close-modal='true']");
+
+    /* Stäng modalen vid klick på overlay eller stängknapp */
+    if (closeTarget) {
+      closeSunModal();
+      return;
+    }
+
+    const showOnMapBtn = event.target.closest("#sun-show-on-map-btn");
+
+    /* Om klicket inte gäller knappen - gör inget */
+    if (!showOnMapBtn) {
+      return;
+    }
+
+    const placeId = showOnMapBtn.dataset.placeId;
+    const selectedPlace = state.weatherData.find((place) => place.id === placeId);
+
+    if (!selectedPlace) {
+      console.log("Hittade ingen plats för Visa på kartan");
+      return;
+    }
+
+    console.log("Klick på Visa på kartan:", selectedPlace);
+
+    if (typeof onShowOnMap === "function") {
+      onShowOnMap(selectedPlace);
+    }
+
+    closeSunModal();
+  });
 }
 
 
@@ -120,20 +241,21 @@ export function initWeather() {
 
   /* Om vi inte är på solsidan - gör inget */
   if (!sunForm || !sunMapElement) {
-    console.log("Inte på solsidan - initWeather avbryts");
     return;
   }
 
-  console.log("Solsidan hittad - startar initWeather");
-
   /* Initiera egen karta för solsidan */
   initMap("sun-map", [62.0, 15.0], 5);
+
+  /* Kopplar modalens knappar */
+  initSunModalEvents((place) => {
+    console.log("Här visas platsen på kartan:", place);
+  });
 
   /* Klick på 'Hämta min position' */
   useLocationBtn?.addEventListener("click", async () => {
     try {
       statusMessage.textContent = "Hämtar din position...";
-      console.log("Startar hämtning av användarposition");
 
       const userPosition = await getUserPosition();
 
@@ -143,7 +265,6 @@ export function initWeather() {
       /* Visa i inputfältet att användaren valt sin position */
       startInput.value = "Min position";
 
-      console.log("Sparad användarposition i state:", state.userPosition);
       statusMessage.textContent = "Din position hämtades.";
     } catch (error) {
       console.error("Kunde inte hämta position:", error);
@@ -152,7 +273,7 @@ export function initWeather() {
   });
 
 
-/* Submit på solsök-formuläret */
+  /* Submit på solsök-formuläret */
   sunForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -160,20 +281,14 @@ export function initWeather() {
       const radiusSelect = document.getElementById("sun-radius");
       const radiusKm = Number(radiusSelect?.value || 200);
 
-      console.log("Form submit är med");
-      console.log("Startvärde i input:", startInput.value);
-      console.log("Vald radie:", radiusKm);
-
       let startCoords = null;
 
       /* Om användaren redan valt 'Min position' används state */
       if (startInput.value.trim() === "Min position" && state.userPosition) {
         startCoords = state.userPosition;
-        console.log("Använder sparad användarposition:", startCoords);
       } else {
         /* Tillfällig fallback */
         startCoords = [15.0, 59.0];
-        console.log("Ingen riktig startposition vald - använder testposition:", startCoords);
       }
 
       statusMessage.textContent = "Genererar testplatser...";
