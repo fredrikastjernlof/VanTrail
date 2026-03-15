@@ -3,6 +3,7 @@
   --theme-primary: #4A7253;
   --theme-secondary: #204523;
   --theme-header-footer-text: #ffffff;
+  --theme-hero-image: url("/images/header_forest.webp");
 }
 
 /* Skog */
@@ -10,6 +11,7 @@ body[data-theme="forest"] {
   --theme-primary: #4A7253;
   --theme-secondary: #204523;
   --theme-header-footer-text: #ffffff;
+  --theme-hero-image: url("/images/header_forest.webp");
 }
 
 /* Solnedgång */
@@ -17,6 +19,7 @@ body[data-theme="sunset"] {
   --theme-primary: #F4AF19;
   --theme-secondary: #D69200;
   --theme-header-footer-text: #000000;
+  --theme-hero-image: url("/images/header_sunset.webp");
 }
 
 /* Hav */
@@ -24,6 +27,7 @@ body[data-theme="ocean"] {
   --theme-primary: #315186;
   --theme-secondary: #01304F;
   --theme-header-footer-text: #ffffff;
+  --theme-hero-image: url("/images/header_ocean.webp");
 }
 
 /* Delar som ska byta färg med tema */

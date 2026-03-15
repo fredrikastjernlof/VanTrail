@@ -84,13 +84,17 @@
     padding: 0.25rem 0;
 }
 
-.hero__image {
-    margin: 0 auto;
-    max-width: var(--max-width);
-    width: 100%;
-    height: 320px;
-    object-fit: cover;
+.hero {
+  margin: 0 auto;
+  width: 100%;
+  max-width: var(--max-width);
+  min-height: 20rem;
+  background-image: var(--theme-hero-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
+
 
 @media (max-width: 768px) {
     .hero__image {
@@ -103,9 +107,9 @@
 }
 
 .map {
-  width: 100%;
-  height: 500px;
-  border: 1px solid #000;
+    width: 100%;
+    height: 500px;
+    border: 1px solid #000;
 }
 
 .route-planner,
@@ -115,30 +119,32 @@
 }
 
 .site-footer {
-    margin-top: var(--space-2xl);
+    margin: 0 auto;
+    width: 100%;
+    max-width: var(--max-width);
+    text-align: center;
+    padding: var(--space-md);
     background-color: var(--color-primary);
 }
 
-.site-footer .container {
-    padding-block: var(--space-md);
-}
+
+
+
 
 /* ===== TEMASIDAN ===== */
 
 .theme-selector {
-  margin-top: var(--space-xl);
-  text-align: center;
+    margin-top: var(--space-xl);
+    text-align: center;
 }
 
 .theme-selector h1 {
-  margin-bottom: var(--space-md);
+    margin-bottom: var(--space-md);
 }
 
 .theme-selector__actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
 }
-
-
