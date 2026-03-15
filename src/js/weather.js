@@ -159,9 +159,11 @@ async function fetchWeatherForPlace(place) {
 
   const data = await response.json();
   const current = data.current;
+  const placeName = await getPlaceName(place.lat, place.lon);
 
   return {
     ...place,
+    name: placeName,
     temperature: current.temperature_2m,
     precipitation: current.precipitation,
     cloud_cover: current.cloud_cover,
@@ -173,6 +175,49 @@ async function fetchWeatherForPlace(place) {
       current.precipitation
     )
   };
+}
+
+/**
+ * Hämtar ortnamn från koordinater via OpenStreetMap Nominatim.
+ *
+ * @param {number} lat
+ * @param {number} lon
+ * @returns {Promise<string>}
+ */
+async function getPlaceName(lat, lon) {
+  try {
+    const url = new URL("https://nominatim.openstreetmap.org/reverse");
+
+    url.searchParams.set("format", "json");
+    url.searchParams.set("lat", lat);
+    url.searchParams.set("lon", lon);
+    url.searchParams.set("zoom", "10");
+
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "VanTrail-App"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Kunde inte hämta ortnamn");
+    }
+
+    const data = await response.json();
+
+    /* försök hitta bästa ortnamn */
+    const name =
+      data.address?.town ||
+      data.address?.village ||
+      data.address?.city ||
+      data.address?.municipality ||
+      data.display_name;
+
+    return name || "Okänd plats";
+  } catch (error) {
+    console.error("Fel vid reverse geocoding:", error);
+    return "Okänd plats";
+  }
 }
 
 /**
