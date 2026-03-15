@@ -172,18 +172,26 @@ form?.addEventListener('submit', async (event) => {
     const normalizedPOIs = normalizePOIs(rawPOIs);
     console.log("Normaliserade POI:", normalizedPOIs);
 
-    /* Test: räkna ut avstånd från första stoppet till rutten */
-    if (normalizedPOIs.length > 0) {
-      const testDistance = getDistanceFromRouteKm(normalizedPOIs[0], routeCoordinates);
+    /* Lägg till avstånd från rutten på varje stopp */
+    const normalizedPOIsWithDistance = normalizedPOIs.map((poi) => ({
+      ...poi,
 
-      console.log("Test - avstånd från första stoppet till rutten:", testDistance);
+      /* Sparar kortaste avståndet till rutten i km */
+      distanceFromRouteKm: getDistanceFromRouteKm(poi, routeCoordinates)
+    }));
+
+    console.log("POI med avstånd från rutten:", normalizedPOIsWithDistance);
+
+    /* Test: kontrollera första stoppets avstånd */
+    if (normalizedPOIsWithDistance.length > 0) {
+      console.log("Test - första stoppet med avstånd:", normalizedPOIsWithDistance[0]);
     }
 
     /* Gruppera stopp efter kategori så de senare kan visas i stopplistan */
-    console.log("Grupperade POI:", groupPOIsByCategory(normalizedPOIs));
+    console.log("Grupperade POI:",groupPOIsByCategory(normalizedPOIsWithDistance));
 
     /* Spara alla stopp från senaste sökningen */
-    currentPOIs = normalizedPOIs;
+    currentPOIs = normalizedPOIsWithDistance;
 
     /* Uppdatera karta och stopplista utifrån valda filter */
     updateFilteredPOIView();
