@@ -1,5 +1,6 @@
 "use strict";
 import "../styles/main.scss";
+import { initTheme } from "./theme.js";
 import { state } from "./state.js";
 import { initWeather } from "./weather.js";
 import { fetchPOIs, normalizePOIs, groupPOIsByCategory, limitPOIsPerCategory, getDistanceFromRouteKm} from "./poi.js";
@@ -10,6 +11,8 @@ import { renderStopsGroups, initPOIModalEvents } from "./ui.js";
 /* Startar kartan direkt när sidan laddas */
 initMap();
 initWeather();
+
+initTheme();
 
 
 /* Hämtar element som JS ska jobba med */
