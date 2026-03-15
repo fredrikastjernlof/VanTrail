@@ -40,6 +40,10 @@ body[data-theme="ocean"] {
   color: var(--theme-header-footer-text);
 }
 
+.site-logo .logo {
+  color: inherit;
+}
+
 /* Vanliga knappar ska följa tema */
 .btn:not(.btn--theme) {
   background-color: var(--theme-primary);

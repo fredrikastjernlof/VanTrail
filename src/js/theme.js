@@ -4,23 +4,30 @@
  * Hanterar val av tema och sparar det i localStorage
  */
 export function initTheme() {
-  const themeButtons = document.querySelectorAll(".btn--theme");
 
-  if (!themeButtons.length) return;
+    //Ladda sparat tema
+    const savedTheme = localStorage.getItem("vantrail-theme");
 
-  themeButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const selectedTheme = button.dataset.theme;
+    if (savedTheme) {
+        document.body.dataset.theme = savedTheme;
+    }
+    const themeButtons = document.querySelectorAll(".btn--theme");
 
-      if (!selectedTheme) return;
+    if (!themeButtons.length) return;
 
-      // sätt tema på body
-      document.body.dataset.theme = selectedTheme;
+    themeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const selectedTheme = button.dataset.theme;
 
-      // spara tema
-      localStorage.setItem("vantrail-theme", selectedTheme);
+            if (!selectedTheme) return;
 
-      console.log("Tema valt:", selectedTheme);
+            // Sätt tema på body
+            document.body.dataset.theme = selectedTheme;
+
+            // Spara tema
+            localStorage.setItem("vantrail-theme", selectedTheme);
+
+            console.log("Tema valt:", selectedTheme);
+        });
     });
-  });
 }
