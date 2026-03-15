@@ -62,50 +62,38 @@
   </header>
 
   <main id="main-content" class="page page--theme">
-  <section class="hero">
-    <img class="hero__image" src="/images/header_forest.webp" alt="">
-  </section>
+    <section class="hero" aria-hidden="true"></section>
 
-  <div class="container">
-    <section class="theme-selector" aria-labelledby="theme-selector-title">
-      <h1 id="theme-selector-title">Välj tema</h1>
+    <div class="container">
+      <section class="theme-selector" aria-labelledby="theme-selector-title">
+        <h1 id="theme-selector-title">Välj tema</h1>
 
-      <div class="theme-selector__actions" role="group" aria-label="Välj färgtema">
-        <button
-          class="btn btn--theme btn--theme-forest"
-          type="button"
-          data-theme="forest"
-          aria-pressed="false">
-          Skog
-        </button>
+        <div class="theme-selector__actions" role="group" aria-label="Välj färgtema">
+          <button class="btn btn--theme btn--theme-forest" type="button" data-theme="forest" aria-pressed="false">
+            Skog
+          </button>
 
-        <button
-          class="btn btn--theme btn--theme-sunset"
-          type="button"
-          data-theme="sunset"
-          aria-pressed="false">
-          Solnedgång
-        </button>
+          <button class="btn btn--theme btn--theme-sunset" type="button" data-theme="sunset" aria-pressed="false">
+            Solnedgång
+          </button>
 
-        <button
-          class="btn btn--theme btn--theme-ocean"
-          type="button"
-          data-theme="ocean"
-          aria-pressed="false">
-          Hav
-        </button>
-      </div>
+          <button class="btn btn--theme btn--theme-ocean" type="button" data-theme="ocean" aria-pressed="false">
+            Hav
+          </button>
+        </div>
 
-      <p id="theme-status" class="status-message" aria-live="polite"></p>
-    </section>
-  </div>
-</main>
+        <p id="theme-status" class="status-message" aria-live="polite"></p>
+        
+      </section>
+    </div>
+  </main>
 
-<footer class="site-footer">
-  <div class="container">
-    <p>&copy; 2026 VanTrail</p>
-  </div>
-</footer>
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 VanTrail</p>
+    </div>
+  </footer>
+
   <script type="module" src="/src/js/main.js"></script>
 </body>
 
