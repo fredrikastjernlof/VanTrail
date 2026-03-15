@@ -10,26 +10,31 @@ let poiLayers = new Map();
 
 /**
  * Initierar kartan.
+ * @param {string} mapId
+ * @param {[number, number]} initialView [lat, lon]
+ * @param {number} initialZoom
  * @returns {L.Map | null}
  */
-export function initMap() {
-  /* Hämtar element i DOM */
-  const mapElement = document.getElementById('map');
+export function initMap(mapId = "map", initialView = [62.0, 15.0], initialZoom = 5) {
+  /* Hämtar rätt karta i DOM utifrån skickat id */
+  const mapElement = document.getElementById(mapId);
 
   /* Om elementet inte finns ska funktionen inte krascha */
   if (!mapElement) {
+    console.log(`[initMap] Hittade inget element med id "${mapId}"`);
     return null;
   }
 
-  /* Skapar Leaflet-karta i HTML-elementet */
-  map = L.map(mapElement).setView([62.0, 15.0], 5);
+  /* Skapar Leaflet-karta i valt HTML-element */
+  map = L.map(mapElement).setView(initialView, initialZoom);
 
-  /* Lägger på själva kartbakgrunden */
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  /* Lägger på kartbakgrunden */
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
 
+  console.log(`[initMap] Karta initierad i #${mapId}`);
   return map;
 }
 
@@ -131,3 +136,5 @@ export function showPOIOnMap(poi) {
   // Öppna popup för den valda markören
   marker.openPopup();
 }
+
+
