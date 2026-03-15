@@ -11,6 +11,7 @@ import { renderStopsGroups, initPOIModalEvents } from "./ui.js";
 
 /* Startar kartan direkt när sidan laddas */
 initMap();
+initWeather();
 
 
 /* Hämtar element som JS ska jobba med */
