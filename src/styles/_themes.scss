@@ -1,0 +1,48 @@
+/* Standardtema om inget annat är valt */
+:root {
+  --theme-primary: #4A7253;
+  --theme-secondary: #204523;
+  --theme-header-footer-text: #ffffff;
+}
+
+/* Skog */
+body[data-theme="forest"] {
+  --theme-primary: #4A7253;
+  --theme-secondary: #204523;
+  --theme-header-footer-text: #ffffff;
+}
+
+/* Solnedgång */
+body[data-theme="sunset"] {
+  --theme-primary: #F4AF19;
+  --theme-secondary: #D69200;
+  --theme-header-footer-text: #000000;
+}
+
+/* Hav */
+body[data-theme="ocean"] {
+  --theme-primary: #315186;
+  --theme-secondary: #01304F;
+  --theme-header-footer-text: #ffffff;
+}
+
+/* Delar som ska byta färg med tema */
+.site-header,
+.site-footer {
+  background-color: var(--theme-primary);
+  color: var(--theme-header-footer-text);
+}
+
+.site-header a,
+.site-footer a,
+.site-logo,
+.site-nav a {
+  color: var(--theme-header-footer-text);
+}
+
+/* Vanliga knappar ska följa tema */
+.btn:not(.btn--theme) {
+  background-color: var(--theme-primary);
+  border-color: var(--theme-secondary);
+  color: var(--theme-header-footer-text);
+}
