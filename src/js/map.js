@@ -63,6 +63,54 @@ export function drawRoute(coordinates) {
   map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
 }
 
+/**
+ * Hämtar emoji för ett POI beroende på typ.
+ *
+ * @param {object} poi
+ * @returns {string}
+ */
+function getPoiMarkerEmoji(poi) {
+  if (["restaurant", "cafe", "fast_food"].includes(poi.type)) {
+    return "🍔";
+  }
+
+  if (poi.type === "toilets") {
+    return "🚻";
+  }
+
+  if (poi.type === "fuel") {
+    return "⛽";
+  }
+
+  if (["camp_site", "caravan_site"].includes(poi.type)) {
+    return "🏕️";
+  }
+
+  if (poi.type === "viewpoint") {
+    return "📷";
+  }
+
+  return "📍";
+}
+
+/**
+ * Skapar en enkel emoji-ikon för Leaflet-markörer.
+ *
+ * @param {object} poi
+ * @returns {L.DivIcon}
+ */
+function createPoiMarkerIcon(poi) {
+  const emoji = getPoiMarkerEmoji(poi);
+
+  return L.divIcon({
+    className: "poi-emoji-marker",
+    html: `<div style="font-size: 1.5rem; line-height: 1;">${emoji}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -14]
+  });
+}
+
 
 /**
  * Ritar POI-markörer på kartan.
@@ -96,7 +144,9 @@ export function drawPOIs(pois) {
     const name = poi.name || "Namnlös plats";
     const type = poi.category || poi.type || "Okänd typ";
 
-    const marker = L.marker([lat, lon])
+    const marker = L.marker([lat, lon], {
+      icon: createPoiMarkerIcon(poi)
+    })
       .addTo(map)
       .bindPopup(`
         <strong>${name}</strong><br>
