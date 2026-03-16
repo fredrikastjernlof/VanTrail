@@ -3,23 +3,22 @@ import "../styles/main.scss";
 import { initTheme } from "./theme.js";
 import { state } from "./state.js";
 import { initWeather } from "./weather.js";
-import { fetchPOIs, normalizePOIs, groupPOIsByCategory, limitPOIsPerCategory, getDistanceFromRouteKm} from "./poi.js";
-import { initMap, drawRoute, drawPOIs, showPOIOnMap } from './map.js';
-import { geocodePlace, fetchRoute } from './route.js';
+import { fetchPOIs, normalizePOIs, groupPOIsByCategory, limitPOIsPerCategory, getDistanceFromRouteKm, sortPOIsAlongRoute } from "./poi.js";
+import { initMap, drawRoute, drawPOIs, showPOIOnMap } from "./map.js";
+import { geocodePlace, fetchRoute } from "./route.js";
 import { renderStopsGroups, initPOIModalEvents } from "./ui.js";
+
 
 /* Startar kartan direkt när sidan laddas */
 initMap();
 initWeather();
-
 initTheme();
 
-
 /* Hämtar element som JS ska jobba med */
-const form = document.getElementById('route-form');
-const startInput = document.getElementById('start-input');
-const destinationInput = document.getElementById('destination-input');
-const statusMessage = document.getElementById('status-message');
+const form = document.getElementById("route-form");
+const startInput = document.getElementById("start-input");
+const destinationInput = document.getElementById("destination-input");
+const statusMessage = document.getElementById("status-message");
 const visibleCountSelect = document.getElementById("visible-count");
 const useLocationBtn = document.getElementById("use-location-btn");
 
@@ -129,7 +128,7 @@ useLocationBtn?.addEventListener("click", () => {
 });
 
 /* Om formuläret finns - lyssna på när det skickas, callbacken är async eftersom den ska använda await */
-form?.addEventListener('submit', async (event) => {
+form?.addEventListener("submit", async (event) => {
   /* Stoppar sidan från att laddas om automatiskt */
   event.preventDefault();
 
@@ -137,14 +136,14 @@ form?.addEventListener('submit', async (event) => {
   const start = startInput.value.trim();
   const destination = destinationInput.value.trim();
 
-  /* Validering - om något fält är tomt: visa meddelande och avbryt funktionen  */
+  /* Validering - om något fält är tomt: visa meddelande och avbryt funktionen */
   if (!start || !destination) {
-    statusMessage.textContent = 'Fyll i startplats och destination.';
+    statusMessage.textContent = "Fyll i startplats och destination.";
     return;
   }
 
   try {
-    statusMessage.textContent = 'Hämtar rutt...'; // Visar status för användaren
+    statusMessage.textContent = "Hämtar rutt...";
 
     const startCoords = start === "Min position" && state.userPosition
       ? state.userPosition
@@ -169,36 +168,37 @@ form?.addEventListener('submit', async (event) => {
     /* Lägg till avstånd från rutten på varje stopp */
     const normalizedPOIsWithDistance = normalizedPOIs.map((poi) => ({
       ...poi,
-
       /* Sparar kortaste avståndet till rutten i km */
       distanceFromRouteKm: getDistanceFromRouteKm(poi, routeCoordinates)
     }));
 
-    console.log("POI med avstånd från rutten:", normalizedPOIsWithDistance);
+    /* Sortera stoppen i ruttens ordning så urvalet blir mer utspritt */
+    const sortedPOIsAlongRoute = sortPOIsAlongRoute(
+      normalizedPOIsWithDistance,
+      routeCoordinates
+    );
 
     /* Test: kontrollera första stoppets avstånd */
-    if (normalizedPOIsWithDistance.length > 0) {
-      console.log("Test - första stoppet med avstånd:", normalizedPOIsWithDistance[0]);
+    if (sortedPOIsAlongRoute.length > 0) {
+      console.log("Test - första stoppet med avstånd:", sortedPOIsAlongRoute[0]);
     }
 
     /* Gruppera stopp efter kategori så de senare kan visas i stopplistan */
-    console.log("Grupperade POI:", groupPOIsByCategory(normalizedPOIsWithDistance));
+    console.log("Grupperade POI:", groupPOIsByCategory(sortedPOIsAlongRoute));
 
     /* Spara alla stopp från senaste sökningen */
-    currentPOIs = normalizedPOIsWithDistance;
+    currentPOIs = sortedPOIsAlongRoute;
 
     /* Uppdatera karta och stopplista utifrån valda filter */
     updateFilteredPOIView();
 
     /* Koppla klick i stopplistan till modalen med POI som redan har ruttavstånd */
-    initPOIModalEvents(normalizedPOIsWithDistance, showPOIOnMap);
+    initPOIModalEvents(sortedPOIsAlongRoute, showPOIOnMap);
 
-    statusMessage.textContent = 'Rutt och stopp hämtade.'; // Visar om allt gått som det ska
-
+    statusMessage.textContent = "Rutt och stopp hämtade.";
   } catch (error) {
-    //Om något går fel:
     console.error(error);
-    statusMessage.textContent = error.message || 'Något gick fel.';
+    statusMessage.textContent = error.message || "Något gick fel.";
   }
 });
 

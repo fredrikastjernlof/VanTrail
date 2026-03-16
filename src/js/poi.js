@@ -45,7 +45,7 @@ function getDistanceKm(pointA, pointB) {
  * Jämför POI:t med alla koordinatpunkter i rutten och tar det minsta värdet.
  *
  * @param {object} poi
- * @param {number[][]} routeCoords 
+ * @param {number[][]} routeCoords
  * @returns {number}
  */
 export function getDistanceFromRouteKm(poi, routeCoords) {
@@ -69,7 +69,6 @@ export function getDistanceFromRouteKm(poi, routeCoords) {
 
   return shortestDistanceKm;
 }
-
 
 /**
  * Väljer ut stopp-punkter med jämnt avstånd längs rutten.
@@ -116,64 +115,124 @@ function getSamplePointsByDistance(routeCoords, sampleDistanceKm) {
   return samplePoints;
 }
 
+/**
+ * Räknar ut ungefärlig total längd i kilometer för en rutt.
+ *
+ * @param {number[][]} routeCoords
+ * @returns {number}
+ */
+function getRouteLengthKm(routeCoords) {
+  if (!routeCoords?.length) {
+    return 0;
+  }
+
+  let totalDistanceKm = 0;
+
+  for (let index = 1; index < routeCoords.length; index++) {
+    totalDistanceKm += getDistanceKm(routeCoords[index - 1], routeCoords[index]);
+  }
+
+  return totalDistanceKm;
+}
+
+/**
+ * Hämtar JSON från Overpass och provar flera endpoints om en instans faller bort.
+ *
+ * @param {string} query
+ * @returns {Promise<object>}
+ */
+async function fetchOverpassWithFallback(query) {
+  const endpoints = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter"
+  ];
+
+  let lastError = null;
+
+  for (const endpoint of endpoints) {
+    try {
+      console.log("Försöker Overpass-endpoint:", endpoint);
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: `data=${encodeURIComponent(query)}`
+      });
+
+      if (!response.ok) {
+        throw new Error(`Overpass svarade med status ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.warn("Overpass-endpoint misslyckades:", endpoint, error);
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error("Kunde inte hämta stopp.");
+}
+
 
 /**
  * Hämtar POI nära en lista av koordinater.
+ * Använder dynamisk sampling för att undvika onödigt stor fråga på långa rutter.
+ *
  * @param {number[][]} routeCoords
  * @returns {Promise<object[]>}
  */
-export async function fetchPOIs(routeCoords) {// Funktionen tar emot routeCoords som är alla koordinater i rutten
+export async function fetchPOIs(routeCoords) {
+  console.log("TEST FETCH START");
+
   if (!routeCoords?.length) {
     return [];
   }
 
+  /* Anpassa sampling efter ruttens längd men håll kvar samma grundidé */
+  const totalRouteDistanceKm = getRouteLengthKm(routeCoords);
+  const minSampleDistanceKm = 8;
+  const maxSamplePoints = 25;
 
-  /* Ett ungefärligt sökområde var 8:e km längs rutten */
-  const sampleDistanceKm = 8;
+  const sampleDistanceKm = Math.max(
+    minSampleDistanceKm,
+    totalRouteDistanceKm / maxSamplePoints
+  );
+
   const samplePoints = getSamplePointsByDistance(routeCoords, sampleDistanceKm);
 
+  console.log("Ruttlängd i km:", totalRouteDistanceKm.toFixed(1));
   console.log("Antal routeCoords:", routeCoords.length);
+  console.log("Sample-avstånd i km:", sampleDistanceKm.toFixed(1));
   console.log("Antal samplePoints:", samplePoints.length);
 
-  /* Hitta noder inom 500 - 1000 meter från koordinaten */
+  /* Hitta noder/ways inom visst avstånd från koordinater längs rutten */
   const queries = samplePoints.map(([lon, lat]) => `
-  node(around:500,${lat},${lon})["amenity"~"toilets|restaurant|fuel|cafe|fast_food"];
-  way(around:500,${lat},${lon})["amenity"~"toilets|restaurant|fuel|cafe|fast_food"];
+    node(around:500,${lat},${lon})["amenity"~"toilets|restaurant|fuel|cafe|fast_food"];
+    way(around:500,${lat},${lon})["amenity"~"toilets|restaurant|fuel|cafe|fast_food"];
 
-  node(around:1000,${lat},${lon})["tourism"~"camp_site|caravan_site|viewpoint"];
-  way(around:1000,${lat},${lon})["tourism"~"camp_site|caravan_site|viewpoint"];
-` );
+    node(around:1000,${lat},${lon})["tourism"~"camp_site|caravan_site|viewpoint"];
+    way(around:1000,${lat},${lon})["tourism"~"camp_site|caravan_site|viewpoint"];
+  `);
 
-
-  /* Gör "en stor fråga av alla små frågor" */
+  /* Gör en fråga av alla del-frågor */
   const overpassQuery = `
-  [out:json][timeout:25];
-  (
-    ${queries.join('\n')}
+    [out:json][timeout:25];
+    (
+      ${queries.join("\n")}
     );
     out center;
   `;
 
-
-  /* Skickar förfrågan till Overpass */
-  const response = await fetch('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    body: overpassQuery
-  });
-
-  if (!response.ok) {
-    throw new Error('Kunde inte hämta stopp.');
-  }
-
-  const data = await response.json();
+  const data = await fetchOverpassWithFallback(overpassQuery);
 
   /* Ta bort dubletter eftersom samma stopp kan hittas från flera stopp-punkter */
-  const uniquePOIs = data.elements.filter((element, index, array) => {
-    return index === array.findIndex((item) => item.id === element.id);
+  const uniquePOIs = (data.elements || []).filter((element, index, array) => {
+    return index === array.findIndex((item) => item.id === element.id && item.type === element.type);
   });
 
   return uniquePOIs;
-
 }
 
 /**
@@ -241,29 +300,27 @@ function getPoiPlaceName(tags = {}) {
  * @returns {object[]}
  */
 export function normalizePOIs(pois) {
-  return pois.map((poi) => {
-    const type = detectPoiType(poi.tags);
+  return pois
+    .map((poi) => {
+      const type = detectPoiType(poi.tags);
 
-    console.log("POI platsnamn från tags:", getPoiPlaceName(poi.tags));
+      console.log("POI platsnamn från tags:", getPoiPlaceName(poi.tags));
 
-    return {
-      id: `${poi.type}-${poi.id}`,
-      name: poi.tags?.name || getPoiCategory(type),
-      type,
-      category: getPoiCategory(type),
-      placeName: getPoiPlaceName(poi.tags),
-      // Node har lat/lon direkt medan way brukar ha center.lat / center.lon
-      lat: poi.lat ?? poi.center?.lat ?? null,
-      lon: poi.lon ?? poi.center?.lon ?? null,
-      tags: poi.tags || {}
-    };
-
+      return {
+        id: `${poi.type}-${poi.id}`,
+        name: poi.tags?.name || getPoiCategory(type),
+        type,
+        category: getPoiCategory(type),
+        placeName: getPoiPlaceName(poi.tags),
+        // Node har lat/lon direkt medan way brukar ha center.lat / center.lon
+        lat: poi.lat ?? poi.center?.lat ?? null,
+        lon: poi.lon ?? poi.center?.lon ?? null,
+        tags: poi.tags || {}
+      };
+    })
     // Filtrera bort objekt utan användbara koordinater
-  }).filter((poi) => poi.lat !== null && poi.lon !== null);
+    .filter((poi) => poi.lat !== null && poi.lon !== null);
 }
-
-/*=============================================================================*/
-
 
 /**
  * Sorterar POI i den ordning de ligger längs rutten.
@@ -310,10 +367,49 @@ function getClosestRouteIndex(poi, routeCoords) {
   return closestIndex;
 }
 
+/**
+ * Väljer ut POI jämnt utspridda över en redan sorterad lista.
+ *
+ * @param {object[]} pois
+ * @param {number} maxPerCategory
+ * @returns {object[]}
+ */
+function pickEvenlyDistributedPOIs(pois, maxPerCategory) {
+  if (!pois?.length || maxPerCategory <= 0) {
+    return [];
+  }
 
-/*=============================================================================*/
+  if (pois.length <= maxPerCategory) {
+    return pois;
+  }
 
+  if (maxPerCategory === 1) {
+    return [pois[0]];
+  }
 
+  const selectedPOIs = [];
+  const lastIndex = pois.length - 1;
+
+  for (let index = 0; index < maxPerCategory; index++) {
+    const targetIndex = Math.round((index * lastIndex) / (maxPerCategory - 1));
+    const candidate = pois[targetIndex];
+
+    if (candidate && !selectedPOIs.some((poi) => poi.id === candidate.id)) {
+      selectedPOIs.push(candidate);
+    }
+  }
+
+  /* Fyll på om avrundning råkar ge dubletter */
+  pois.forEach((poi) => {
+    const alreadySelected = selectedPOIs.some((selected) => selected.id === poi.id);
+
+    if (!alreadySelected && selectedPOIs.length < maxPerCategory) {
+      selectedPOIs.push(poi);
+    }
+  });
+
+  return selectedPOIs.slice(0, maxPerCategory);
+}
 
 
 /**
@@ -337,6 +433,8 @@ export function groupPOIsByCategory(pois) {
 
 /**
  * Begränsar antal POI per kategori.
+ * Förutsätter att listan redan är sorterad i ruttens ordning.
+ *
  * @param {Object<string, object[]>} groupedPOIs
  * @param {number} maxPerCategory
  * @returns {Object<string, object[]>}
@@ -345,7 +443,7 @@ export function limitPOIsPerCategory(groupedPOIs, maxPerCategory) {
   return Object.fromEntries(
     Object.entries(groupedPOIs).map(([category, pois]) => [
       category,
-      pois.slice(0, maxPerCategory)
+      pickEvenlyDistributedPOIs(pois, maxPerCategory)
     ])
   );
 }
