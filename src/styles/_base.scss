@@ -11,12 +11,22 @@ html {
 }
 
 body {
+    background:
+      linear-gradient(
+        45deg,
+        var(--theme-secondary) 0%,
+        var(--theme-extra-dark) 25%,
+        var(--theme-secondary) 50%,
+        var(--theme-extra-dark) 75%,
+        var(--theme-secondary) 100%,
+      );
+
     font-family: var(--font-body);
     margin: 0;
-    background-color: var(--color-bg);
     color: var(--color-text-primary);
     line-height: 1.5;
 }
+
 
 img {
     display: block;
@@ -49,6 +59,7 @@ h2,
 h3,
 p {
     margin: 0;
+    padding-bottom: var(--space-xs);
 }
 
 .skip-link {

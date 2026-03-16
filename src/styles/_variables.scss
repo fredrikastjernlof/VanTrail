@@ -1,24 +1,24 @@
 :root {
-/* ========================= LAYOUT ========================= */
+    /* ========================= LAYOUT ========================= */
     --max-width: 1100px;
     --page-padding: 1rem;
 
-/* ========================= TEXT ========================= */
+    /* ========================= TEXT ========================= */
     --font-body: "Sometype Mono", monospace;
     --font-logo: "Just Another Hand", cursive;
 
-/* ========================= FÄRGER ========================= */
+    /* ========================= FÄRGER ========================= */
     --color-bg: #ffffff;
     --color-primary: #4A7253;
     --color-secondary: #204523;
     --color-text-primary: #1f1f1f;
     --color-text-secondary: #f5f5f5;
-    
-/* ========================= EFFEKTER ========================= */    
 
-    --shadow-btn: 0 4px 14px rgba(0, 0, 0, 0.5 );
+    /* ========================= EFFEKTER ========================= */
 
-/* ========================= SPACING ========================= */
+    --shadow-btn: 0 4px 14px rgba(0, 0, 0, 0.5);
+
+    /* ========================= SPACING ========================= */
 
     --space-xs: 0.5rem;
     --space-sm: 0.75rem;
@@ -40,5 +40,11 @@
         --color-text-primary: #f5f5f5;
         --shadow-btn: 0 4px 14px rgba(0, 0, 0, 0.9);
     }
-}
 
+    .stop-item__button,
+    .stops-group__toggle {
+        color: white;
+    }
+
+    
+}

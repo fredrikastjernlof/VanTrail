@@ -67,7 +67,7 @@
     <div class="container">
       <section class="route-planner" aria-labelledby="route-planner-title">
 
-        <h1 id="route-planner-title">Planera din roadtrip</h1>
+        <h1 id="route-planner-title">Planera din roadtrip 🚐</h1>
 
         <form id="route-form" class="route-form">
           <div class="route-form__row">
@@ -82,9 +82,9 @@
                 required>
             </div>
 
-            <div class="btn--positioning">
-              <button class="btn btn--primary" type="button" id="use-location-btn">
-                Hämta min position
+            <div class="btn-positioning">
+              <button class="btn-use-location" type="button" id="use-location-btn">
+                📍 Använd min position
               </button>
             </div>
 
@@ -118,18 +118,21 @@
             <label class="filter-option" for="filter-viewpoints">
               <input class="filter-option__input" type="checkbox" id="filter-viewpoints" name="stopType"
                 value="viewpoints" checked>
-              <span class="filter-option__label">🌄 Utsiktsplatser</span>
+              <span class="filter-option__label">📷 Utsiktsplatser</span>
             </label>
           </fieldset>
 
           <div class="route-form__actions">
             <button class="btn btn--primary" type="submit">
-              Planera rutt
+              🧭 Planera rutt
             </button>
           </div>
         </form>
-
-        <div id="status-message" class="status-message" aria-live="polite"></div>
+        
+        <div class="status">
+          <p>Status:</p>
+          <div id="status-message" class="status-message" aria-live="polite"></div>
+        </div>
 
       </section>
 
@@ -189,11 +192,11 @@
 
         <div class="poi-card__actions">
           <button id="show-on-map-btn" class="btn btn--primary" type="button">
-            Visa på kartan
+            🗺️ Visa på kartan
           </button>
 
           <a id="navigate-btn" class="btn btn--primary" href="#">
-            Navigera hit
+            🧭 Navigera hit
           </a>
         </div>
       </div>

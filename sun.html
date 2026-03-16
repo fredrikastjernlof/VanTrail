@@ -67,7 +67,7 @@
     <div class="container">
       <section class="sun-page" aria-labelledby="sun-page-title">
         <div class="sun-page__intro">
-          <h1 id="sun-page-title" class="sun-page__title">Jaga solen</h1>
+          <h1 id="sun-page-title" class="sun-page__title">Jaga solen ☀️</h1>
           <p class="sun-page__text">
             Hitta soliga platser nära dig och välj vart du vill köra.
           </p>
@@ -78,13 +78,7 @@
 
           <form id="sun-form" class="sun-form">
             <div class="sun-form__field">
-              <label class="form-field__label" for="sun-start-input">Startplats</label>
-              <input class="form-field__input" type="text" id="sun-start-input" name="start" autocomplete="off"
-                required>
-            </div>
-
-            <div class="sun-form__field">
-              <label class="form-field__label" for="sun-radius">Sök inom</label>
+              <label class="form-field__label" for="sun-radius">Sök inom:</label>
               <select id="sun-radius" class="form-field__input" name="radius">
                 <option value="100">100 km</option>
                 <option value="200" selected>200 km</option>
@@ -93,24 +87,33 @@
                 <option value="500">500 km</option>
               </select>
             </div>
+            <div class="sun-form__field">
+              <label class="form-field__label" for="sun-start-input">Startplats:</label>
+              <input class="form-field__input" type="text" id="sun-start-input" name="start" autocomplete="off"
+                required>
+            </div>
 
             <div class="sun-form__actions">
-              <button class="btn btn--secondary" type="button" id="sun-use-location-btn">
-                Hämta min position
+              <button class="btn-use-location" type="button" id="sun-use-location-btn">
+                📍 Hämta min position
               </button>
 
               <button class="btn btn--primary" type="submit" id="sun-search-btn">
-                Sök sol
+                ☀️ Sök sol
               </button>
             </div>
-
+            <div class="status">
+              <p>Status:</p>
             <p id="sun-status-message" class="status-message" aria-live="polite"></p>
+            </div>
+          
           </form>
         </section>
 
         <section class="sun-results" aria-labelledby="sun-results-title">
           <div class="sun-results__header">
             <h2 id="sun-results-title" class="section-title">Närmaste sol just nu</h2>
+            <p> Nedan listas platser där solen skiner just nu:</p>
           </div>
 
           <div id="sun-results-list" class="sun-results__list">

@@ -2,6 +2,7 @@
 :root {
   --theme-primary: #4A7253;
   --theme-secondary: #204523;
+  --theme-extra-dark:#132315;
   --theme-header-footer-text: #ffffff;
   --theme-hero-image: url("/images/header_forest.webp");
 }
@@ -10,22 +11,25 @@
 body[data-theme="forest"] {
   --theme-primary: #4A7253;
   --theme-secondary: #204523;
+  --theme-extra-dark:#132315;
   --theme-header-footer-text: #ffffff;
   --theme-hero-image: url("/images/header_forest.webp");
 }
 
 /* Solnedgång */
 body[data-theme="sunset"] {
-  --theme-primary: #F4AF19;
-  --theme-secondary: #D69200;
+  --theme-primary: #f0b433;
+  --theme-secondary: #a7750b;
+  --theme-extra-dark:#f6ca6b;
   --theme-header-footer-text: #000000;
   --theme-hero-image: url("/images/header_sunset.webp");
 }
 
 /* Hav */
 body[data-theme="ocean"] {
-  --theme-primary: #315186;
+  --theme-primary: #1f385f;
   --theme-secondary: #01304F;
+  --theme-extra-dark: #011623;
   --theme-header-footer-text: #ffffff;
   --theme-hero-image: url("/images/header_ocean.webp");
 }
@@ -49,7 +53,7 @@ body[data-theme="ocean"] {
 }
 
 /* Vanliga knappar ska följa tema */
-.btn:not(.btn--theme) {
+.btn:not(.btn--theme, .btn--use-location) {
   background-color: var(--theme-primary);
   border-color: var(--theme-secondary);
   color: var(--theme-header-footer-text);
