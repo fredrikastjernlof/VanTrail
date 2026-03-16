@@ -5,6 +5,25 @@
 // Förhindrar att event listeners registreras flera gånger
 let poiModalEventsInitialized = false;
 
+
+/**
+ * Bygger etikett för stopp i listan.
+ * Visar namn och ort om ort finns.
+ *
+ * @param {object} poi
+ * @returns {string}
+ */
+function getStopListLabel(poi) {
+  const name = poi.name || "Namnlös plats";
+  const placeName = poi.placeName?.trim();
+
+  if (!placeName) {
+    return name;
+  }
+
+  return `${name}, ${placeName}`;
+}
+
 /**
  * Renderar grupperade stopp i stopplistan.
  * @param {Object<string, object[]>} groupedPOIs
@@ -78,7 +97,7 @@ export function renderStopsGroups(groupedPOIs) {
       button.className = "stop-item__button";
       button.dataset.poiId = poi.id;
 
-      button.innerHTML = `<span class="stop-item__name">${poi.name}</span>`;
+      button.innerHTML = `<span class="stop-item__name">${getStopListLabel(poi)}</span>`;
 
       item.appendChild(button);
       list.appendChild(item);
@@ -98,15 +117,17 @@ export function openPOIModal(poi) {
   const modal = document.getElementById("poi-modal");
   const title = document.getElementById("poi-modal-title");
   const type = document.getElementById("poi-type");
+  const location = document.getElementById("poi-location");
   const distance = document.getElementById("poi-distance");
   const navigateBtn = document.getElementById("navigate-btn");
   const showOnMapBtn = document.getElementById("show-on-map-btn");
 
-  if (!modal || !title || !type || !distance || !navigateBtn || !showOnMapBtn) {
+  if (!modal || !title || !type || !distance || !location || !navigateBtn || !showOnMapBtn) {
     return;
   }
 
   title.textContent = poi.name || "Namnlös plats";
+  location.textContent = poi.placeName || "Okänd plats";
   type.textContent = poi.category || poi.type || "Okänd typ";
 
   console.log("POI i modal:", poi);
@@ -115,9 +136,9 @@ export function openPOIModal(poi) {
   if (typeof poi.distanceFromRouteKm === "number") {
     if (poi.distanceFromRouteKm < 1) {
       const meters = Math.round(poi.distanceFromRouteKm * 1000);
-      distance.textContent = `${meters} m från rutten`;
+      distance.textContent = `${meters} m`;
     } else {
-      distance.textContent = `${poi.distanceFromRouteKm.toFixed(1)} km från rutten`;
+      distance.textContent = `${poi.distanceFromRouteKm.toFixed(1)} km`;
     }
   } else {
     distance.textContent = "Avstånd okänt";

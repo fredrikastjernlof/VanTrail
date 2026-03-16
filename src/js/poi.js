@@ -215,6 +215,27 @@ function getPoiCategory(type) {
 }
 
 /**
+ * Hämtar platsnamn för ett POI från OSM-taggar.
+ * Försöker hitta ort eller kommun i en enkel prioriterad ordning.
+ *
+ * @param {object} tags
+ * @returns {string}
+ */
+function getPoiPlaceName(tags = {}) {
+  return (
+    tags["addr:city"] ||
+    tags["addr:town"] ||
+    tags["addr:village"] ||
+    tags["addr:municipality"] ||
+    tags["is_in:city"] ||
+    tags["is_in:town"] ||
+    tags["is_in:village"] ||
+    tags["is_in"] ||
+    ""
+  );
+}
+
+/**
  * Normaliserar rå POI-data från Overpass till ett enhetligt format.
  * @param {object[]} pois
  * @returns {object[]}
@@ -223,16 +244,20 @@ export function normalizePOIs(pois) {
   return pois.map((poi) => {
     const type = detectPoiType(poi.tags);
 
+    console.log("POI platsnamn från tags:", getPoiPlaceName(poi.tags));
+
     return {
       id: `${poi.type}-${poi.id}`,
       name: poi.tags?.name || getPoiCategory(type),
       type,
       category: getPoiCategory(type),
+      placeName: getPoiPlaceName(poi.tags),
       // Node har lat/lon direkt medan way brukar ha center.lat / center.lon
       lat: poi.lat ?? poi.center?.lat ?? null,
       lon: poi.lon ?? poi.center?.lon ?? null,
       tags: poi.tags || {}
     };
+
     // Filtrera bort objekt utan användbara koordinater
   }).filter((poi) => poi.lat !== null && poi.lon !== null);
 }
