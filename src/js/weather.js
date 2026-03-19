@@ -115,10 +115,50 @@ function getDistanceKm(pointA, pointB) {
  */
 function getWeatherLabel(weatherCode, cloudCover, precipitation) {
   if (precipitation > 0.2) return "Nederbörd";
-  if (weatherCode === 0) return "Klar himmel";
-  if (cloudCover <= 25) return "Soligt";
-  if (cloudCover <= 50) return "Lätt molnighet";
-  return "Molnigt";
+  if (weatherCode === 0 && cloudCover <= 15) return "Soligt";
+  if (cloudCover <= 25) return "Klart";
+  if (cloudCover <= 50) return "Halvklart";
+  return "Torrt men molnigt";
+}
+
+/**
+ * Returnerar vädertyp för sortering och presentation.
+ *
+ * @param {object} weather
+ * @returns {string}
+ */
+function getWeatherType(weather) {
+  if (weather.precipitation > 0.2) {
+    return "bad";
+  }
+
+  if (weather.is_day === 1 && weather.weather_code === 0 && weather.cloud_cover <= 15) {
+    return "sunny";
+  }
+
+  if (weather.cloud_cover <= 25) {
+    return "clear";
+  }
+
+  if (weather.cloud_cover <= 50) {
+    return "partly-cloudy";
+  }
+
+  return "dry";
+}
+
+/**
+ * Returnerar ikon för vald vädertyp.
+ *
+ * @param {string} weatherType
+ * @returns {string}
+ */
+function getWeatherIcon(weatherType) {
+  if (weatherType === "sunny") return "☀️";
+  if (weatherType === "clear") return "🌤️";
+  if (weatherType === "partly-cloudy") return "⛅️";
+  if (weatherType === "dry") return "☁️";
+  return "🌧️";
 }
 
 /**
@@ -128,11 +168,9 @@ function getWeatherLabel(weatherCode, cloudCover, precipitation) {
  * @returns {boolean}
  */
 function isGoodWeather(weather) {
-  return (
-    weather.is_day === 1 &&
-    weather.precipitation <= 0.2 &&
-    weather.cloud_cover <= 50
-  );
+  const weatherType = getWeatherType(weather);
+
+  return weatherType !== "bad";
 }
 
 /**
@@ -159,16 +197,24 @@ async function fetchWeatherForPlace(place) {
 
   const data = await response.json();
   const current = data.current;
-  const placeName = await getPlaceName(place.lat, place.lon);
+  const placeName = place.name;
 
-  return {
+  const weatherData = {
     ...place,
     name: placeName,
     temperature: current.temperature_2m,
     precipitation: current.precipitation,
     cloud_cover: current.cloud_cover,
     weather_code: current.weather_code,
-    is_day: current.is_day,
+    is_day: current.is_day
+  };
+
+  const weatherType = getWeatherType(weatherData);
+
+  return {
+    ...weatherData,
+    weatherType,
+    weatherIcon: getWeatherIcon(weatherType),
     weatherLabel: getWeatherLabel(
       current.weather_code,
       current.cloud_cover,
@@ -177,47 +223,8 @@ async function fetchWeatherForPlace(place) {
   };
 }
 
-/**
- * Hämtar ortnamn från koordinater via OpenStreetMap Nominatim.
- *
- * @param {number} lat
- * @param {number} lon
- * @returns {Promise<string>}
- */
 async function getPlaceName(lat, lon) {
-  try {
-    const url = new URL("https://nominatim.openstreetmap.org/reverse");
-
-    url.searchParams.set("format", "json");
-    url.searchParams.set("lat", lat);
-    url.searchParams.set("lon", lon);
-    url.searchParams.set("zoom", "10");
-
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "VanTrail-App"
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error("Kunde inte hämta ortnamn");
-    }
-
-    const data = await response.json();
-
-    /* försök hitta bästa ortnamn */
-    const name =
-      data.address?.town ||
-      data.address?.village ||
-      data.address?.city ||
-      data.address?.municipality ||
-      data.display_name;
-
-    return name || "Okänd plats";
-  } catch (error) {
-    console.error("Fel vid reverse geocoding:", error);
-    return "Okänd plats";
-  }
+  return "";
 }
 
 /**
@@ -251,7 +258,7 @@ function renderSunResultsList(places) {
     button.dataset.placeId = place.id;
 
 
-    button.innerHTML = `<span>${place.name}</span>`;
+    button.innerHTML = `<span>${place.weatherIcon || "☀️"} ${place.name}</span>`;
 
     button.addEventListener("click", () => {
       console.log("Klick på plats i listan:", place);
@@ -442,14 +449,30 @@ export function initWeather() {
 
       console.log("Väderresultat:", weatherResults);
 
-      /* Filtrera ut platser med fint väder */
+      /* Filtrera bort dåligt väder och sortera bästa vädret först */
+      const weatherPriority = {
+        sunny: 1,
+        clear: 2,
+        "partly-cloudy": 3,
+        dry: 4
+      };
+
       const sunnyPlaces = weatherResults
         .filter(isGoodWeather)
         .map((place) => ({
           ...place,
           distanceKm: getDistanceKm(startCoords, [place.lon, place.lat])
         }))
-        .sort((a, b) => a.distanceKm - b.distanceKm);
+        .sort((a, b) => {
+          const priorityA = weatherPriority[a.weatherType] || 99;
+          const priorityB = weatherPriority[b.weatherType] || 99;
+
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
+
+          return a.distanceKm - b.distanceKm;
+        });
 
       console.log("Filtrerade solplatser:", sunnyPlaces);
 
