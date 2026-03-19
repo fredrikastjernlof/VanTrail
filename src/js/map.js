@@ -94,7 +94,7 @@ function getPoiMarkerEmoji(poi) {
 }
 
 /**
- * Skapar en enkel emoji-ikon för Leaflet-markörer.
+ * Skapar en enkel emoji-ikon för POI-markörer.
  *
  * @param {object} poi
  * @returns {L.DivIcon}
@@ -142,6 +142,7 @@ export function drawPOIs(pois) {
     }
 
     const name = poi.name || "Namnlös plats";
+    const placeName = poi.placeName ? `<br>${poi.placeName}` : "";
     const type = poi.category || poi.type || "Okänd typ";
 
     const marker = L.marker([lat, lon], {
@@ -150,7 +151,8 @@ export function drawPOIs(pois) {
       .addTo(map)
       .bindPopup(`
         <strong>${name}</strong><br>
-        ${type}<br>
+        ${type}
+        ${placeName}<br>
         <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" rel="noopener noreferrer">
           Navigera hit
         </a>
@@ -190,6 +192,34 @@ export function showPOIOnMap(poi) {
 /*=========== SOLSIDAN ============*/
 
 /**
+ * Returnerar emoji för en väderplats.
+ *
+ * @param {object} place
+ * @returns {string}
+ */
+function getSunnyPlaceMarkerEmoji(place) {
+  return place.weatherIcon || "☀️";
+}
+
+/**
+ * Skapar en enkel emoji-ikon för vädermarkörer i Leaflet.
+ *
+ * @param {object} place
+ * @returns {L.DivIcon}
+ */
+function createSunnyPlaceMarkerIcon(place) {
+  const emoji = getSunnyPlaceMarkerEmoji(place);
+
+  return L.divIcon({
+    className: "poi-emoji-marker",
+    html: `<div style="font-size: 1.5rem; line-height: 1;">${emoji}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -14]
+  });
+}
+
+/**
  * Ritar ut solplatser som markörer på kartan.
  *
  * @param {object[]} places
@@ -210,10 +240,12 @@ export function drawSunnyPlaces(places) {
   }
 
   places.forEach((place) => {
-    const marker = L.marker([place.lat, place.lon])
+    const marker = L.marker([place.lat, place.lon], {
+      icon: createSunnyPlaceMarkerIcon(place)
+    })
       .addTo(map)
       .bindPopup(`
-        <strong>${place.name}</strong><br>
+        <strong>${place.weatherIcon || "☀️"} ${place.name}</strong><br>
         ${place.weatherLabel}<br>
         ${place.temperature}°C
       `);
