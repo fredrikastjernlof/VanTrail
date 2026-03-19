@@ -309,45 +309,110 @@ async function getPlaceName(lat, lon) {
 }
 
 /**
- * Renderar en enkel lista med platsnamn.
+ * Grupperar väderplatser för nu, senare idag och imorgon.
+ *
+ * @param {object[]} places
+ * @returns {Object<string, object[]>}
+ */
+function groupSunPlacesByTime(places) {
+  return {
+    "Bra väder just nu": places
+      .map((place) => place.forecasts?.now)
+      .filter((place) => place && isGoodWeather(place)),
+
+    "Bra väder senare idag": places
+      .map((place) => place.forecasts?.laterToday)
+      .filter((place) => place && isGoodWeather(place)),
+
+    "Bra väder imorgon": places
+      .map((place) => place.forecasts?.tomorrow)
+      .filter((place) => place && isGoodWeather(place))
+  };
+}
+
+/**
+ * Renderar grupperade väderresultat i utfällbara listor.
  *
  * @param {object[]} places
  */
 function renderSunResultsList(places) {
-  const list = document.getElementById("sun-results-list");
+  const container = document.getElementById("sun-results-list");
 
-  if (!list) {
+  if (!container) {
     console.log("Hittade inte #sun-results-list");
     return;
   }
 
   /* Töm tidigare innehåll */
-  list.innerHTML = "";
+  container.innerHTML = "";
 
-  if (!places.length) {
-    list.innerHTML = "<p>Inga platser hittades.</p>";
+  const groupedPlaces = groupSunPlacesByTime(places);
+  const groups = Object.entries(groupedPlaces);
+
+  if (!groups.length) {
+    container.innerHTML = "<p>Inga platser hittades.</p>";
     return;
   }
 
-  places.forEach((place) => {
-    const item = document.createElement("article");
-    item.className = "sun-result-item";
+  groups.forEach(([groupTitle, groupPlaces]) => {
+    const group = document.createElement("div");
+    group.className = "sun-results-group";
 
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "sun-result-button";
-    button.dataset.placeId = place.id;
+    const heading = document.createElement("h3");
+    heading.className = "sun-results-group__title";
 
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+        toggleBtn.className = "sun-results-group__toggle";
+    toggleBtn.textContent = `${groupTitle} (${groupPlaces.length})`;
+    toggleBtn.setAttribute("aria-expanded", "false");
 
-    button.innerHTML = `<span>${place.weatherIcon || "☀️"} ${place.name}</span>`;
+    const list = document.createElement("ul");
+    list.className = "sun-results-group__list";
+    list.hidden = true;
 
-    button.addEventListener("click", () => {
-      console.log("Klick på plats i listan:", place);
-      openSunModal(place);
+    toggleBtn.addEventListener("click", () => {
+      const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
+
+      toggleBtn.setAttribute("aria-expanded", String(!isOpen));
+      list.hidden = isOpen;
     });
 
-    item.appendChild(button);
-    list.appendChild(item);
+    if (!groupPlaces.length) {
+      const emptyItem = document.createElement("li");
+      emptyItem.className = "stop-item";
+      emptyItem.textContent = "Inga platser hittades.";
+      list.appendChild(emptyItem);
+    }
+
+    groupPlaces.forEach((place, index) => {
+      const item = document.createElement("li");
+      item.className = "stop-item";
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "stop-item__button";
+      button.dataset.placeId = place.id;
+
+      const placeLabel = place.id === "sun-center"
+        ? "Nära dig"
+        : `Plats ${index + 1}`;
+
+      button.innerHTML = `<span class="stop-item__name">${place.weatherIcon || "☀️"} ${placeLabel}</span>`;
+
+      button.addEventListener("click", () => {
+        console.log("Klick på plats i listan:", place);
+        openSunModal(place);
+      });
+
+      item.appendChild(button);
+      list.appendChild(item);
+    });
+
+    heading.appendChild(toggleBtn);
+    group.appendChild(heading);
+    group.appendChild(list);
+    container.appendChild(group);
   });
 
   console.log("Resultatlista renderad");
