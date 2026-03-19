@@ -5,6 +5,9 @@ import { initMap, drawSunnyPlaces, showSunnyPlaceOnMap } from "./map.js";
 
 /* Här samlas sånt som rör väder */
 
+/* Sparar aktuell väderplats som visas i modalen */
+let currentModalWeatherPlace = null;
+
 /**
  * Hämtar användarens position från webbläsaren.
  * Returnerar koordinater i formatet [lon, lat]
@@ -438,6 +441,9 @@ function openSunModal(place) {
     return;
   }
 
+  /* Spara aktuell plats så modalen alltid använder rätt data */
+  currentModalWeatherPlace = place;
+
   /* Fyller modalen med data för vald plats */
   title.textContent = place.name || "Namnlös plats";
   weather.textContent = place.weatherLabel || "Soligt";
@@ -501,18 +507,15 @@ function initSunModalEvents(onShowOnMap) {
       return;
     }
 
-    const placeId = showOnMapBtn.dataset.placeId;
-    const selectedPlace = state.weatherData.find((place) => place.id === placeId);
-
-    if (!selectedPlace) {
+     if (!currentModalWeatherPlace) {
       console.log("Hittade ingen plats för Visa på kartan");
       return;
     }
 
-    console.log("Klick på Visa på kartan:", selectedPlace);
+    console.log("Klick på Visa på kartan:", currentModalWeatherPlace);
 
     if (typeof onShowOnMap === "function") {
-      onShowOnMap(selectedPlace);
+      onShowOnMap(currentModalWeatherPlace);
     }
 
     closeSunModal();
