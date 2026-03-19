@@ -114,10 +114,10 @@ function getDistanceKm(pointA, pointB) {
  */
 function getWeatherLabel(weatherCode, cloudCover, precipitation) {
   if (precipitation > 0.2) return "Nederbörd";
-  if (weatherCode === 0 && cloudCover <= 15) return "Soligt";
-  if (cloudCover <= 25) return "Klart";
+  if (weatherCode === 0 && cloudCover <= 15) return "Klart";
+  if (cloudCover <= 25) return "Lätt molnighet";
   if (cloudCover <= 50) return "Halvklart";
-  return "Torrt men molnigt";
+  return "Molnigt";
 }
 
 /**
@@ -173,6 +173,62 @@ function isGoodWeather(weather) {
 }
 
 /**
+ * Hämtar väderdata för en viss timme i prognosen.
+ *
+ * @param {object} hourly
+ * @param {number} index
+ * @returns {object|null}
+ */
+function getHourlyWeatherAtIndex(hourly, index) {
+  if (!hourly?.time?.length || index < 0 || index >= hourly.time.length) {
+    return null;
+  }
+
+  return {
+    temperature: hourly.temperature_2m?.[index],
+    precipitation: hourly.precipitation?.[index],
+    cloud_cover: hourly.cloud_cover?.[index],
+    weather_code: hourly.weather_code?.[index],
+    is_day: hourly.is_day?.[index]
+  };
+}
+
+/**
+ * Bygger ett väderobjekt med typ, ikon och etikett.
+ *
+ * @param {object} basePlace
+ * @param {object} weather
+ * @returns {object}
+ */
+function buildWeatherSnapshot(basePlace, weather) {
+  if (!weather) {
+    return null;
+  }
+
+  const weatherData = {
+    ...basePlace,
+    temperature: weather.temperature,
+    precipitation: weather.precipitation,
+    cloud_cover: weather.cloud_cover,
+    weather_code: weather.weather_code,
+    is_day: weather.is_day
+  };
+
+  const weatherType = getWeatherType(weatherData);
+
+  return {
+    ...weatherData,
+    weatherType,
+    weatherIcon: getWeatherIcon(weatherType),
+    weatherLabel: getWeatherLabel(
+      weather.weather_code,
+      weather.cloud_cover,
+      weather.precipitation
+    )
+  };
+}
+
+/**
  * Hämtar väderdata för en plats från Open-Meteo.
  *
  * @param {object} place
@@ -185,8 +241,13 @@ async function fetchWeatherForPlace(place) {
   url.searchParams.set("longitude", place.lon);
   url.searchParams.set(
     "current",
-    "temperature_2m,precipitation,cloud_cover,weather_code,is_day"
-  );
+    "temperature_2m,precipitation,cloud_cover,weather_code,is_day");
+  url.searchParams.set(
+    "hourly",
+    "temperature_2m,precipitation,cloud_cover,weather_code,is_day");
+  url.searchParams.set(
+    "forecast_days", "2");
+
 
   const response = await fetch(url);
 
@@ -196,31 +257,52 @@ async function fetchWeatherForPlace(place) {
 
   const data = await response.json();
   const current = data.current;
+  const hourly = data.hourly;
   const placeName = place.name;
 
-  const weatherData = {
-    ...place,
-    name: placeName,
-    temperature: current.temperature_2m,
-    precipitation: current.precipitation,
-    cloud_cover: current.cloud_cover,
-    weather_code: current.weather_code,
-    is_day: current.is_day
-  };
+  const currentSnapshot = buildWeatherSnapshot(
+    {
+      ...place,
+      name: placeName
+    },
+    {
+      temperature: current.temperature_2m,
+      precipitation: current.precipitation,
+      cloud_cover: current.cloud_cover,
+      weather_code: current.weather_code,
+      is_day: current.is_day
+    }
+  );
 
-  const weatherType = getWeatherType(weatherData);
+  /* Enkel första prognos:
+     senare idag = ungefär 6 timmar fram
+     imorgon = ungefär 24 timmar fram */
+  const laterTodaySnapshot = buildWeatherSnapshot(
+    {
+      ...place,
+      name: placeName
+    },
+    getHourlyWeatherAtIndex(hourly, 6)
+  );
+
+  const tomorrowSnapshot = buildWeatherSnapshot(
+    {
+      ...place,
+      name: placeName
+    },
+    getHourlyWeatherAtIndex(hourly, 24)
+  );
 
   return {
-    ...weatherData,
-    weatherType,
-    weatherIcon: getWeatherIcon(weatherType),
-    weatherLabel: getWeatherLabel(
-      current.weather_code,
-      current.cloud_cover,
-      current.precipitation
-    )
+    ...currentSnapshot,
+    forecasts: {
+      now: currentSnapshot,
+      laterToday: laterTodaySnapshot,
+      tomorrow: tomorrowSnapshot
+    }
   };
 }
+
 
 async function getPlaceName(lat, lon) {
   return "";
@@ -451,8 +533,11 @@ export function initWeather() {
       const weatherResults = weatherResultsSettled
         .filter((result) => result.status === "fulfilled")
         .map((result) => result.value);
-        
+
       console.log("Väderresultat:", weatherResults);
+      console.log("Första platsens forecasts:", weatherResults[0]?.forecasts);
+      console.log("Första platsens laterToday:", weatherResults[0]?.forecasts?.laterToday);
+      console.log("Första platsens tomorrow:", weatherResults[0]?.forecasts?.tomorrow);
 
       /* Filtrera bort dåligt väder, sortera bästa vädret först och döp om platserna i resultatordning */
       const weatherPriority = {
@@ -495,8 +580,8 @@ export function initWeather() {
       renderSunResultsList(sunnyPlaces);
 
       statusMessage.textContent = sunnyPlaces.length
-        ? `${sunnyPlaces.length} soliga platser hittades.`
-        : "Ingen tydligt solig plats hittades just nu.";
+        ? `${sunnyPlaces.length} platser med bra väder hittades.`
+        : "Ingen plats med bra väder hittades just nu.";
     } catch (error) {
       console.error("Fel vid submit:", error);
       statusMessage.textContent = error.message || "Något gick fel.";
