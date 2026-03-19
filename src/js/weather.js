@@ -67,7 +67,6 @@ function generateCandidatePlaces(center, radiusKm) {
 
     places.push({
       id: `sun-${i + 1}`,
-      name: `Solplats ${i + 1}`,
       lon: centerLon + lonOffset,
       lat: centerLat + latOffset
     });
@@ -442,14 +441,20 @@ export function initWeather() {
       /* Generera kandidatplatser runt startpunkten */
       const candidates = generateCandidatePlaces(startCoords, radiusKm);
 
-      /* Hämta väder för alla kandidatplatser */
-      const weatherResults = await Promise.all(
+      /* Hämta väder för alla kandidatplatser. Promise.allSettled gör 
+      att vi kan visa de anrop som lyckas även om vissa misslyckas 
+      (t.ex. vid rate limiting). */
+      const weatherResultsSettled = await Promise.allSettled(
         candidates.map((place) => fetchWeatherForPlace(place))
       );
 
+      const weatherResults = weatherResultsSettled
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value);
+        
       console.log("Väderresultat:", weatherResults);
 
-      /* Filtrera bort dåligt väder och sortera bästa vädret först */
+      /* Filtrera bort dåligt väder, sortera bästa vädret först och döp om platserna i resultatordning */
       const weatherPriority = {
         sunny: 1,
         clear: 2,
@@ -472,7 +477,13 @@ export function initWeather() {
           }
 
           return a.distanceKm - b.distanceKm;
-        });
+        })
+        .map((place, index) => ({
+          ...place,
+          name: index === 0 && place.id === "sun-center"
+            ? "Nära dig"
+            : `Plats ${index + 1}`
+        }));
 
       console.log("Filtrerade solplatser:", sunnyPlaces);
 
