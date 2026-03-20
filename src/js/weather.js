@@ -7,6 +7,8 @@ import { initMap, drawSunnyPlaces, showSunnyPlaceOnMap } from "./map.js";
 
 /* Sparar aktuell väderplats som visas i modalen */
 let currentModalWeatherPlace = null;
+/* Sparar grupperade väderplatser */
+let currentGroupedSunPlaces = {};
 
 /**
  * Hämtar användarens position från webbläsaren.
@@ -134,7 +136,7 @@ function getWeatherType(weather) {
     return "bad";
   }
 
-  if (weather.is_day === 1 && weather.weather_code === 0 && weather.cloud_cover <= 15) {
+  if (weather.weather_code === 0 && weather.cloud_cover <= 15) {
     return "sunny";
   }
 
@@ -210,6 +212,7 @@ function buildWeatherSnapshot(basePlace, weather) {
 
   const weatherData = {
     ...basePlace,
+    name: basePlace.name || "Namnlös plats",
     temperature: weather.temperature,
     precipitation: weather.precipitation,
     cloud_cover: weather.cloud_cover,
@@ -261,12 +264,11 @@ async function fetchWeatherForPlace(place) {
   const data = await response.json();
   const current = data.current;
   const hourly = data.hourly;
-  const placeName = place.name;
 
   const currentSnapshot = buildWeatherSnapshot(
     {
       ...place,
-      name: placeName
+      name: place.name || ""
     },
     {
       temperature: current.temperature_2m,
@@ -283,7 +285,7 @@ async function fetchWeatherForPlace(place) {
   const laterTodaySnapshot = buildWeatherSnapshot(
     {
       ...place,
-      name: placeName
+      name: place.name || ""
     },
     getHourlyWeatherAtIndex(hourly, 6)
   );
@@ -291,7 +293,7 @@ async function fetchWeatherForPlace(place) {
   const tomorrowSnapshot = buildWeatherSnapshot(
     {
       ...place,
-      name: placeName
+      name: place.name || ""
     },
     getHourlyWeatherAtIndex(hourly, 24)
   );
@@ -306,9 +308,38 @@ async function fetchWeatherForPlace(place) {
   };
 }
 
+/**
+ * Sorterar och döper om väderplatser inom en grupp.
+ *
+ * @param {object[]} places
+ * @returns {object[]}
+ */
+function sortAndNameSunGroupPlaces(places) {
+  const weatherPriority = {
+    sunny: 1,
+    clear: 2,
+    "partly-cloudy": 3,
+    dry: 4
+  };
 
-async function getPlaceName(lat, lon) {
-  return "";
+  return places
+    .filter((place) => place && isGoodWeather(place))
+    .sort((a, b) => {
+      const priorityA = weatherPriority[a.weatherType] || 99;
+      const priorityB = weatherPriority[b.weatherType] || 99;
+
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+
+      return (a.distanceKm || 0) - (b.distanceKm || 0);
+    })
+    .map((place, index) => ({
+      ...place,
+      name: place.id === "sun-center"
+        ? "Nära dig"
+        : `Plats ${index + 1}`
+    }));
 }
 
 /**
@@ -319,17 +350,29 @@ async function getPlaceName(lat, lon) {
  */
 function groupSunPlacesByTime(places) {
   return {
-    "Bra väder just nu": places
-      .map((place) => place.forecasts?.now)
-      .filter((place) => place && isGoodWeather(place)),
+    "Bra väder just nu": sortAndNameSunGroupPlaces(
+      places.map((place) => place.forecasts?.now ? {
+        ...place.forecasts.now,
+        distanceKm: place.distanceKm,
+        forecastGroup: "Just nu"
+      } : null)
+    ),
 
-    "Bra väder senare idag": places
-      .map((place) => place.forecasts?.laterToday)
-      .filter((place) => place && isGoodWeather(place)),
+    "Bra väder senare idag": sortAndNameSunGroupPlaces(
+      places.map((place) => place.forecasts?.laterToday ? {
+        ...place.forecasts.laterToday,
+        distanceKm: place.distanceKm,
+        forecastGroup: "Senare idag"
+      } : null)
+    ),
 
-    "Bra väder imorgon": places
-      .map((place) => place.forecasts?.tomorrow)
-      .filter((place) => place && isGoodWeather(place))
+    "Bra väder imorgon": sortAndNameSunGroupPlaces(
+      places.map((place) => place.forecasts?.tomorrow ? {
+        ...place.forecasts.tomorrow,
+        distanceKm: place.distanceKm,
+        forecastGroup: "Imorgon"
+      } : null)
+    )
   };
 }
 
@@ -366,7 +409,7 @@ function renderSunResultsList(places) {
 
     const toggleBtn = document.createElement("button");
     toggleBtn.type = "button";
-        toggleBtn.className = "sun-results-group__toggle";
+    toggleBtn.className = "sun-results-group__toggle";
     toggleBtn.textContent = `${groupTitle} (${groupPlaces.length})`;
     toggleBtn.setAttribute("aria-expanded", "false");
 
@@ -379,6 +422,24 @@ function renderSunResultsList(places) {
 
       toggleBtn.setAttribute("aria-expanded", String(!isOpen));
       list.hidden = isOpen;
+
+      /* Uppdatera karta när grupp öppnas */
+      if (!isOpen) {
+        drawSunnyPlaces(groupPlaces);
+
+        /* Uppdatera rubrik */
+        const mapTitle = document.getElementById("sun-map-title");
+
+        if (mapTitle) {
+          if (groupTitle === "Bra väder just nu") {
+            mapTitle.textContent = "Karta för väderprognos just nu";
+          } else if (groupTitle === "Bra väder senare idag") {
+            mapTitle.textContent = "Karta för väderprognos senare idag";
+          } else if (groupTitle === "Bra väder imorgon") {
+            mapTitle.textContent = "Karta för väderprognos imorgon";
+          }
+        }
+      }
     });
 
     if (!groupPlaces.length) {
@@ -397,11 +458,7 @@ function renderSunResultsList(places) {
       button.className = "stop-item__button";
       button.dataset.placeId = place.id;
 
-      const placeLabel = place.id === "sun-center"
-        ? "Nära dig"
-        : `Plats ${index + 1}`;
-
-      button.innerHTML = `<span class="stop-item__name">${place.weatherIcon || "☀️"} ${placeLabel}</span>`;
+      button.innerHTML = `<span class="stop-item__name">${place.weatherIcon || "☀️"} ${place.name}</span>`;
 
       button.addEventListener("click", () => {
         console.log("Klick på plats i listan:", place);
@@ -430,13 +487,14 @@ function renderSunResultsList(places) {
 function openSunModal(place) {
   const modal = document.getElementById("sun-modal");
   const title = document.getElementById("sun-modal-title");
+  const forecastGroup = document.getElementById("sun-forecast-group");
   const weather = document.getElementById("sun-weather");
   const temperature = document.getElementById("sun-temperature");
   const distance = document.getElementById("sun-distance");
   const showOnMapBtn = document.getElementById("sun-show-on-map-btn");
   const navigateBtn = document.getElementById("sun-navigate-btn");
 
-  if (!modal || !title || !weather || !temperature || !distance || !showOnMapBtn || !navigateBtn) {
+  if (!modal || !title || !forecastGroup || !weather || !temperature || !distance || !showOnMapBtn || !navigateBtn) {
     console.log("Kunde inte öppna modalen - element saknas");
     return;
   }
@@ -445,8 +503,9 @@ function openSunModal(place) {
   currentModalWeatherPlace = place;
 
   /* Fyller modalen med data för vald plats */
-  title.textContent = place.name || "Namnlös plats";
-  weather.textContent = place.weatherLabel || "Soligt";
+  title.textContent = `${place.weatherIcon || "☀️"} ${place.name || "Namnlös plats"}`;
+  forecastGroup.textContent = place.forecastGroup || "";
+  weather.textContent = place.weatherLabel || "Okänt väder";
   temperature.textContent = place.temperature !== undefined ? `${place.temperature} °C` : "Okänd";
   distance.textContent = place.distanceKm !== undefined ? `${Math.round(place.distanceKm)} km` : "Okänt";
 
@@ -507,13 +566,29 @@ function initSunModalEvents(onShowOnMap) {
       return;
     }
 
-     if (!currentModalWeatherPlace) {
+    if (!currentModalWeatherPlace) {
       console.log("Hittade ingen plats för Visa på kartan");
       return;
     }
 
     console.log("Klick på Visa på kartan:", currentModalWeatherPlace);
 
+    if (!currentModalWeatherPlace) {
+      return;
+    }
+
+    /* Hämta rätt grupp baserat på forecast */
+    let groupKey = "Bra väder just nu";
+
+    if (currentModalWeatherPlace.forecastGroup === "Senare idag") {
+      groupKey = "Bra väder senare idag";
+    }
+
+    if (currentModalWeatherPlace.forecastGroup === "Imorgon") {
+      groupKey = "Bra väder imorgon";
+    }
+
+    /* Zooma till vald plats */
     if (typeof onShowOnMap === "function") {
       onShowOnMap(currentModalWeatherPlace);
     }
@@ -615,7 +690,14 @@ export function initWeather() {
         dry: 4
       };
 
-      const sunnyPlaces = weatherResults
+      const namedPlaces = weatherResults.map((place, index) => ({
+        ...place,
+        name: index === 0 && place.id === "sun-center"
+          ? "Nära dig"
+          : `Plats ${index + 1}`
+      }));
+
+      const sunnyPlaces = namedPlaces
         .filter(isGoodWeather)
         .map((place) => ({
           ...place,
@@ -630,21 +712,18 @@ export function initWeather() {
           }
 
           return a.distanceKm - b.distanceKm;
-        })
-        .map((place, index) => ({
-          ...place,
-          name: index === 0 && place.id === "sun-center"
-            ? "Nära dig"
-            : `Plats ${index + 1}`
-        }));
+        });
 
       console.log("Filtrerade solplatser:", sunnyPlaces);
 
       /* Spara i state */
       state.weatherData = sunnyPlaces;
 
+      currentGroupedSunPlaces = groupSunPlacesByTime(sunnyPlaces);
+      const currentSunPlaces = currentGroupedSunPlaces["Bra väder just nu"] || [];
+
       /* Uppdatera UI */
-      drawSunnyPlaces(sunnyPlaces);
+      drawSunnyPlaces(currentSunPlaces);
       renderSunResultsList(sunnyPlaces);
 
       statusMessage.textContent = sunnyPlaces.length

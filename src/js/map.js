@@ -245,10 +245,10 @@ export function drawSunnyPlaces(places) {
     })
       .addTo(map)
       .bindPopup(`
-        <strong>${place.weatherIcon || "☀️"} ${place.name}</strong><br>
-        ${place.weatherLabel}<br>
-        ${place.temperature}°C
-      `);
+  <strong>${place.weatherIcon || "☀️"} ${place.name}</strong><br>
+  ${place.forecastGroup ? `${place.forecastGroup}: ` : ""}${place.weatherLabel}<br>
+  ${place.temperature}°C
+`);
 
     poiLayers.set(place.id, marker);
   });
