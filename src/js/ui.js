@@ -134,7 +134,6 @@ title.textContent = poi.name || "Namnlös plats";
 location.textContent = poi.placeName || "Okänd plats";
 type.textContent = poi.category || poi.type || "Okänd typ";
 
-console.log("POI i modal:", poi);
 
 /* Visa avstånd från rutten i meter eller kilometer */
 if (typeof poi.distanceFromRouteKm === "number") {
