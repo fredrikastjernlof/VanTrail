@@ -242,7 +242,10 @@ export function drawSunnyPlaces(places) {
       .bindPopup(`
   <strong>${place.weatherIcon || "☀️"} ${place.name}</strong><br>
   ${place.forecastGroup ? `${place.forecastGroup}: ` : ""}${place.weatherLabel}<br>
-  ${place.temperature}°C
+  ${place.temperature}°C<br>
+  <a href="https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}" target="_blank" rel="noopener noreferrer">
+    Navigera hit
+  </a>
 `);
 
     poiLayers.set(place.id, marker);
