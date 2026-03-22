@@ -253,7 +253,11 @@
   margin-top: auto;
 }
 
-@media (min-width: 768px) {
+#sun-radius {
+  margin-left: var(--space-sm);
+}
+
+@media (min-width: 380px) {
   .sun-form__top-row {
     flex-direction: row;
     align-items: flex-end;
