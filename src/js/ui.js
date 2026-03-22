@@ -72,9 +72,20 @@ Utsiktsplatser: "📷",
 Övrigt: "📍"
 };
 
+const shortLabels = {
+  "Mat & restauranger": "Mat",
+  "Ställplatser / camping": "Camping"
+};
+
 const icon = icons[category] || "";
 
-toggleBtn.textContent = `${icon} ${category} (${groupedPOIs[category].length})`;
+const count = groupedPOIs[category].length;
+const shortCategory = shortLabels[category] || category;
+
+toggleBtn.innerHTML = `
+  <span class="label-full">${icon} ${category} (${count})</span>
+  <span class="label-short" aria-hidden="true">${icon} ${shortCategory} (${count})</span>
+`;
 
 heading.appendChild(toggleBtn);
 toggleBtn.setAttribute("aria-expanded", "false");
