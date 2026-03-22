@@ -1,75 +1,11 @@
-@use 'variables';
-@use 'themes';
-
-.route-planner h1,
-.trip-map h2,
-.route-stops h2 {
-  margin-bottom: var(--space-md);
-}
-
-nav a {
-  text-decoration: none;
-  transition: color 0.2s ease, transform 0.15s ease;
-}
-
-nav a[aria-current="page"] {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-nav a:hover {
-  color: #606060;
-  transform: translateY(-1px);
-}
-
-.site-nav li {
-  position: relative;
-}
-
-.site-nav li+li::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: calc(var(--space-6xl) / -2);
-  transform: translateY(-50%);
-  height: 2.5em;
-  width: 0;
-  border-left: 1px solid var(--theme-header-footer-text);
-}
-
-@media (max-width: 768px) {
-  .site-nav li+li::before {
-    left: calc(var(--space-4xl) / -2);
-  }
-
-}
-
-@media (max-width: 480px) {
-  .site-nav li+li::before {
-    left: calc(var(--space-xl) / -2);
-  }
-}
-
-
-.route-form__row {
-  display: grid;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-
-@media (min-width: 768px) {
-  .route-form__row {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
+/* ===== FORMULÄR ===== 
+*/
 .sun-form__field,
 .form-field {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
 }
-
 
 .form-field__input,
 .route-stops__select {
@@ -84,7 +20,6 @@ nav a:hover {
 
 #visible-count,
 #sun-radius {
-  margin-bottom: var(--space-md);
   max-width: var(--space-3xl);
 }
 
@@ -93,6 +28,8 @@ nav a:hover {
 #sun-start-input {
   box-shadow: inset 0 5px 14px rgba(0, 0, 0, 0.4);
 }
+
+/* ===== CHECKBOXAR ===== */
 
 .filter-group {
   margin: var(--space-lg) 0;
@@ -115,29 +52,77 @@ nav a:hover {
   margin-bottom: 0;
 }
 
-.route-form__actions {
-  margin-top: var(--space-md);
+
+/* ===== STATUS ===== */
+
+.status {
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    border: solid 1px black;
+
+    p {
+        font-weight: bolder;
+    }
 }
+
+.status-message {
+  min-height: 1.5rem;
+  margin-top: var(--space-sm);
+}
+
+
+/* ===== KNAPPAR ===== */
 
 .btn {
   display: inline-block;
-  margin-top: var(--space-md);
   padding: 0.5rem 1rem;
   border-radius: 10px;
   border: 2px solid var(--color-secondary);
   background-color: var(--color-primary);
   color: var(--color-text-secondary);
-  box-shadow: var(--shadow-btn);
+  box-shadow:
+    var(--shadow-btn),
+    inset 0 0 10px 4px rgba(0, 0, 0, 0.7),
+    inset 0 0 12px 6px rgba(0, 0, 0, 0.5);
+
+  transform: translateY(0);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    filter 0.3s ease;
 }
 
 .btn-use-location {
-  margin-top: var(--space-sm);
-  padding: 0.3rem;
+  color: var(--color-text-primary);
+  background-color: transparent;
+  padding: var(--space-sm);
   border-radius: 5px;
-  border: #757575 solid 2px;
+  border: none;
+  margin-top: auto;
 }
 
-/*=====TEMASIDAN=====*/
+.btn-use-location:hover,
+.btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  filter: brightness(1.06);
+
+  box-shadow:
+    inset 0 0 16px 8px rgba(0, 0, 0, 0.65),
+    inset 0 0 20px 12px rgba(0, 0, 0, 0.55);
+}
+
+.btn-use-location:active,
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+  box-shadow:
+    inset 0 0 10px 4px rgba(0, 0, 0, 0.7),
+    inset 0 0 14px 8px rgba(0, 0, 0, 0.6);
+}
+
+
+
+/* ===== KNAPPAR TEMASIDAN ===== */
 
 .btn--theme {
   min-width: 10rem;
@@ -147,6 +132,7 @@ nav a:hover {
 
 /* Skog */
 .btn--theme-forest {
+  margin-bottom: var(--space-md);
   background-color: #4A7253;
   border-color: #204523;
   color: #ffffff;
@@ -154,6 +140,7 @@ nav a:hover {
 
 /* Solnedgång */
 .btn--theme-sunset {
+  margin-bottom: var(--space-md);
   background-color: #F4AF19;
   border-color: #D69200;
   color: #000000;
@@ -161,17 +148,14 @@ nav a:hover {
 
 /* Hav */
 .btn--theme-ocean {
+  margin-bottom: var(--space-md);
   background-color: #315186;
   border-color: #01304F;
   color: #ffffff;
 }
 
-/*===================*/
+/* ===== KARTA ===== */
 
-.status-message {
-  min-height: 1.5rem;
-  margin-top: var(--space-sm);
-}
 
 .map {
   position: relative;
@@ -183,27 +167,26 @@ nav a:hover {
 }
 
 .sun-map .map {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
 }
 
-.route-stops__toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-md);
-}
 
+/* ===== LISTOR & KORT ===== */
+
+.sun-results__list,
 .stops-groups {
   border-top: 1px solid #000;
 }
 
+.sun-results-group,
 .stops-group {
   border-bottom: 1px solid #000;
 }
 
 .stop-item__button,
-.sun-results__list,
-.stops-group__toggle {
+.stops-group__toggle,
+.sun-results-group__toggle {
+  color: var(--color-text-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -215,34 +198,66 @@ nav a:hover {
 }
 
 .stop-item__button::after,
-.sun-results__list::after,
-.stops-group__toggle::after {
+.stops-group__toggle::after,
+.sun-results-group__toggle::after {
   content: "▸";
   margin-left: 0.5rem;
   display: inline-block;
   transition: transform 0.2s ease;
 }
 
+.sun-results-group__toggle[aria-expanded="true"]::after,
 .stops-group__toggle[aria-expanded="true"]::after {
   transform: rotate(90deg);
 }
 
 .stop-item__button {
-  padding: var(--space-md) var(--space-2xl);
   border-top: #000 1px solid;
+  padding-right: clamp(1rem, 6vw, 2rem);
+  padding-left: clamp(1rem, 6vw, 3rem);
 }
 
-.stops-group__list {
+.stops-group__list,
+.sun-results-group__list {
   padding-bottom: var(--space-sm);
 }
 
-.stop-list-item__button {
-  width: 100%;
-  padding: 0.5rem 0;
-  border: 0;
-  background: transparent;
-  text-align: left;
+#sun-forecast-group {
+  font-weight: bolder;
 }
+
+.sun-card__actions,
+.poi-card__actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.sun-card,
+.poi-card {
+  margin: var(--space-lg);
+}
+
+@media (max-width: 480px) {
+
+  .sun-card,
+  .poi-card {
+    margin: var(--space-sm);
+  }
+}
+
+.sun-card p {
+  padding-left: clamp(2rem, 6vw, 2.5rem);
+}
+
+.sun-card__actions .btn,
+.poi-card__actions .btn {
+  margin-top: 0;
+}
+
+/* ===== MODAL ===== */
 
 .modal[hidden] {
   display: none;
@@ -280,20 +295,4 @@ nav a:hover {
   color: var(--color-text-primary);
   background: transparent;
   font-size: 1.5rem;
-}
-
-.poi-card__actions {
-  display: flex;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.poi-card {
-  margin: var(--space-lg);
-}
-
-.poi-card__actions .btn {
-  margin-top: 0;
 }

@@ -67,26 +67,37 @@
     <div class="container">
       <section class="sun-page" aria-labelledby="sun-page-title">
         <div class="sun-page__intro">
-          <h1 id="sun-page-title" class="sun-page__title">Jaga solen ☀️</h1>
+          <h1 id="sun-page-title" class="sun-page__title">☀️ Jaga solen</h1>
           <p class="sun-page__text">
-            Hitta soliga platser nära dig och välj vart du vill köra.
+            Låt väderprognosen bestämma riktningen.</p>
+          <p class="sun-page__text">Se var solen skiner just nu – och åk dit.
           </p>
         </div>
 
         <section class="sun-form-section" aria-labelledby="sun-form-title">
-          <h2 id="sun-form-title" class="section-title">Sök soliga platser</h2>
+
+          <h2 id="sun-form-title" class="section-title">Var är vädret bäst?</h2>
 
           <form id="sun-form" class="sun-form">
-            <div class="sun-form__field">
-              <label class="form-field__label" for="sun-radius">Sök inom:</label>
-              <select id="sun-radius" class="form-field__input" name="radius">
-                <option value="100">100 km</option>
-                <option value="200" selected>200 km</option>
-                <option value="300">300 km</option>
-                <option value="400">400 km</option>
-                <option value="500">500 km</option>
-              </select>
+            <div class="sun-form__top-row">
+
+              <div class="sun-form__field">
+                <label class="form-field__label" for="sun-radius">Sök inom:</label>
+                <select id="sun-radius" class="form-field__input" name="radius">
+                  <option value="100">100 km</option>
+                  <option value="200" selected>200 km</option>
+                  <option value="300">300 km</option>
+                  <option value="400">400 km</option>
+                </select>
+              </div>
+
+              <div class="sun-form__location">
+                <button class="btn-use-location" type="button" id="sun-use-location-btn">
+                  📍 Hämta min position
+                </button>
+              </div>
             </div>
+
             <div class="sun-form__field">
               <label class="form-field__label" for="sun-start-input">Startplats:</label>
               <input class="form-field__input" type="text" id="sun-start-input" name="start" autocomplete="off"
@@ -94,36 +105,33 @@
             </div>
 
             <div class="sun-form__actions">
-              <button class="btn-use-location" type="button" id="sun-use-location-btn">
-                📍 Hämta min position
-              </button>
-
               <button class="btn btn--primary" type="submit" id="sun-search-btn">
                 ☀️ Sök sol
               </button>
             </div>
+
             <div class="status">
               <p>Status:</p>
-            <p id="sun-status-message" class="status-message" aria-live="polite"></p>
+              <p id="sun-status-message" class="status-message" aria-live="polite"></p>
             </div>
-          
+
           </form>
+        </section>
+
+        <section class="sun-map" aria-labelledby="sun-map-title">
+          <h2 id="sun-map-title" class="section-title">Väderprognos just nu</h2>
+          <div id="sun-map" class="map" aria-label="Karta som visar platser med bra väder"></div>
         </section>
 
         <section class="sun-results" aria-labelledby="sun-results-title">
           <div class="sun-results__header">
-            <h2 id="sun-results-title" class="section-title">Närmaste sol just nu</h2>
-            <p> Nedan listas platser där solen skiner just nu:</p>
+            <h2 id="sun-results-title" class="section-title">Bästa vädret nära dig</h2>
+            <p>Här visas platser med bäst väder just nu:</p>
           </div>
 
           <div id="sun-results-list" class="sun-results__list">
             <!-- STYRS MED JS -->
           </div>
-        </section>
-
-        <section class="sun-map" aria-labelledby="sun-map-title">
-          <h2 id="sun-map-title" class="section-title">Solkartan</h2>
-          <div id="sun-map" class="map" aria-label="Karta som visar soliga platser"></div>
         </section>
       </section>
     </div>
@@ -145,7 +153,11 @@
       </button>
 
       <div class="sun-card">
-        <h2 id="sun-modal-title" class="sun-card__title"></h2>
+        <h2 id="sun-modal-title" class="sun-card__title">Plats</h2>
+
+        <p class="sun-card__meta">
+          <span id="sun-forecast-group"></span>
+        </p>
 
         <p class="sun-card__meta">
           Väderstatus: <span id="sun-weather"></span>
@@ -161,11 +173,11 @@
 
         <div class="sun-card__actions">
           <button id="sun-show-on-map-btn" class="btn btn--primary" type="button">
-            Visa på kartan
+           🗺️ Visa på kartan
           </button>
 
           <a id="sun-navigate-btn" class="btn btn--primary" href="#" target="_blank" rel="noopener">
-            Navigera hit
+           🧭 Navigera hit
           </a>
         </div>
       </div>

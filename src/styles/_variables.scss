@@ -34,6 +34,8 @@
 
 }
 
+/* ===================== PREFERS COLOR SCHEME ===================== */
+
 @media (prefers-color-scheme: dark) {
     :root {
         --color-bg: #212121;
@@ -41,10 +43,4 @@
         --shadow-btn: 0 4px 14px rgba(0, 0, 0, 0.9);
     }
 
-    .stop-item__button,
-    .stops-group__toggle {
-        color: white;
-    }
-
-    
 }

@@ -1,4 +1,4 @@
-@use 'variables';
+/* ===== RESET ===== */
 
 *,
 *::before,
@@ -10,23 +10,22 @@ html {
     font-size: 100%;
 }
 
-body {
-    background:
-      linear-gradient(
-        45deg,
-        var(--theme-secondary) 0%,
-        var(--theme-extra-dark) 25%,
-        var(--theme-secondary) 50%,
-        var(--theme-extra-dark) 75%,
-        var(--theme-secondary) 100%,
-      );
 
-    font-family: var(--font-body);
+/* ===== BAS-ELEMENT ===== */
+
+body {
     margin: 0;
+    background:
+        linear-gradient(90deg,
+            var(--theme-secondary) 0%,
+            var(--theme-extra-dark) 25%,
+            var(--theme-secondary) 50%,
+            var(--theme-extra-dark) 75%,
+            var(--theme-secondary) 100%);
     color: var(--color-text-primary);
+    font-family: var(--font-body);
     line-height: 1.5;
 }
-
 
 img {
     display: block;
@@ -54,6 +53,9 @@ ul {
     list-style: none;
 }
 
+
+/* ===== TYPOGRAFI ===== */
+
 h1,
 h2,
 h3,
@@ -62,17 +64,20 @@ p {
     padding-bottom: var(--space-xs);
 }
 
+
+/* ===== TILLGÄNGLIGHET ===== */
+
 .skip-link {
     position: absolute;
-    left: -9999px;
     top: auto;
+    left: -9999px;
 }
 
 .skip-link:focus {
-    left: 1rem;
     top: 1rem;
+    left: 1rem;
+    z-index: 1000;
     padding: 0.5rem 0.75rem;
     background: #000;
     color: #fff;
-    z-index: 1000;
 }

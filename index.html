@@ -70,24 +70,21 @@
         <h1 id="route-planner-title">Planera din roadtrip 🚐</h1>
 
         <form id="route-form" class="route-form">
+          <div class="btn-positioning">
+              <button class="btn-use-location" type="button" id="use-location-btn">
+                📍 Använd min position
+              </button>
+            </div>
           <div class="route-form__row">
             <div class="form-field">
               <label class="form-field__label" for="start-input">Startplats:</label>
               <input class="form-field__input" type="text" id="start-input" name="start" autocomplete="off" required>
             </div>
-
             <div class="form-field">
               <label class="form-field__label" for="destination-input">Destination:</label>
               <input class="form-field__input" type="text" id="destination-input" name="destination" autocomplete="off"
                 required>
             </div>
-
-            <div class="btn-positioning">
-              <button class="btn-use-location" type="button" id="use-location-btn">
-                📍 Använd min position
-              </button>
-            </div>
-
           </div>
 
           <fieldset class="filter-group">
@@ -123,8 +120,8 @@
           </fieldset>
 
           <div class="route-form__actions">
-            <button class="btn btn--primary" type="submit">
-              🧭 Planera rutt
+            <button class="btn btn--primary" id="get-route-btn" type="submit">
+              🧭 Hämta rutt
             </button>
           </div>
         </form>
@@ -180,11 +177,13 @@
       </button>
 
       <div class="poi-card">
-        <h2 id="poi-modal-title" class="poi-card__title"></h2>
+        <h2 id="poi-modal-title" class="poi-card__title">Här kan man va 👀</h2>
 
         <p class="poi-card__meta">
           Typ: <span id="poi-type"></span>
         </p>
+
+        <p>Ort: <span id="poi-location">Okänd plats</span></p>  <!-- HÄR TESTAR JAG NU-->
 
         <p class="poi-card__meta">
           Avstånd från rutten: <span id="poi-distance"></span>
