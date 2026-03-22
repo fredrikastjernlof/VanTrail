@@ -117,11 +117,9 @@ useLocationBtn?.addEventListener("click", () => {
       /* Skriv in i startfältet så användaren ser vad som valts */
       startInput.value = "Min position";
 
-      console.log("Användarens position:", state.userPosition);
       statusMessage.textContent = "Din position hämtades.";
     },
-    (error) => {
-      console.error("Fel vid hämtning av position:", error);
+    () => {
       statusMessage.textContent = "Kunde inte hämta din position.";
     }
   );
@@ -159,11 +157,9 @@ form?.addEventListener("submit", async (event) => {
 
     /* Hämta stopp */
     const rawPOIs = await fetchPOIs(routeCoordinates);
-    console.log("Rå POI-data:", rawPOIs);
 
     /* Normalisera stopp */
     const normalizedPOIs = normalizePOIs(rawPOIs);
-    console.log("Normaliserade POI:", normalizedPOIs);
 
     /* Lägg till avstånd från rutten på varje stopp */
     const normalizedPOIsWithDistance = normalizedPOIs.map((poi) => ({
@@ -178,14 +174,6 @@ form?.addEventListener("submit", async (event) => {
       routeCoordinates
     );
 
-    /* Test: kontrollera första stoppets avstånd */
-    if (sortedPOIsAlongRoute.length > 0) {
-      console.log("Test - första stoppet med avstånd:", sortedPOIsAlongRoute[0]);
-    }
-
-    /* Gruppera stopp efter kategori så de senare kan visas i stopplistan */
-    console.log("Grupperade POI:", groupPOIsByCategory(sortedPOIsAlongRoute));
-
     /* Spara alla stopp från senaste sökningen */
     currentPOIs = sortedPOIsAlongRoute;
 
@@ -197,7 +185,6 @@ form?.addEventListener("submit", async (event) => {
 
     statusMessage.textContent = "Rutt och stopp hämtade.";
   } catch (error) {
-    console.error(error);
     statusMessage.textContent = error.message || "Något gick fel.";
   }
 });
