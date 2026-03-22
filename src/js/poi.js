@@ -151,7 +151,6 @@ async function fetchOverpassWithFallback(query) {
 
   for (const endpoint of endpoints) {
     try {
-      console.log("Försöker Overpass-endpoint:", endpoint);
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -167,7 +166,6 @@ async function fetchOverpassWithFallback(query) {
 
       return await response.json();
     } catch (error) {
-      console.warn("Overpass-endpoint misslyckades:", endpoint, error);
       lastError = error;
     }
   }
@@ -184,7 +182,6 @@ async function fetchOverpassWithFallback(query) {
  * @returns {Promise<object[]>}
  */
 export async function fetchPOIs(routeCoords) {
-  console.log("TEST FETCH START");
 
   if (!routeCoords?.length) {
     return [];
@@ -202,10 +199,6 @@ export async function fetchPOIs(routeCoords) {
 
   const samplePoints = getSamplePointsByDistance(routeCoords, sampleDistanceKm);
 
-  console.log("Ruttlängd i km:", totalRouteDistanceKm.toFixed(1));
-  console.log("Antal routeCoords:", routeCoords.length);
-  console.log("Sample-avstånd i km:", sampleDistanceKm.toFixed(1));
-  console.log("Antal samplePoints:", samplePoints.length);
 
   /* Hitta noder/ways inom visst avstånd från koordinater längs rutten */
   const queries = samplePoints.map(([lon, lat]) => `
@@ -303,8 +296,6 @@ export function normalizePOIs(pois) {
   return pois
     .map((poi) => {
       const type = detectPoiType(poi.tags);
-
-      console.log("POI platsnamn från tags:", getPoiPlaceName(poi.tags));
 
       return {
         id: `${poi.type}-${poi.id}`,

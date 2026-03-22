@@ -385,7 +385,6 @@ function renderSunResultsList(places) {
   const container = document.getElementById("sun-results-list");
 
   if (!container) {
-    console.log("Hittade inte #sun-results-list");
     return;
   }
 
@@ -461,7 +460,6 @@ function renderSunResultsList(places) {
       button.innerHTML = `<span class="stop-item__name">${place.weatherIcon || "☀️"} ${place.name}</span>`;
 
       button.addEventListener("click", () => {
-        console.log("Klick på plats i listan:", place);
         openSunModal(place);
       });
 
@@ -474,8 +472,6 @@ function renderSunResultsList(places) {
     group.appendChild(list);
     container.appendChild(group);
   });
-
-  console.log("Resultatlista renderad");
 }
 
 
@@ -495,7 +491,7 @@ function openSunModal(place) {
   const navigateBtn = document.getElementById("sun-navigate-btn");
 
   if (!modal || !title || !forecastGroup || !weather || !temperature || !distance || !showOnMapBtn || !navigateBtn) {
-    console.log("Kunde inte öppna modalen - element saknas");
+
     return;
   }
 
@@ -519,7 +515,6 @@ function openSunModal(place) {
 
   modal.hidden = false;
 
-  console.log("Modal öppnad för:", place);
 }
 
 /**
@@ -533,7 +528,7 @@ function closeSunModal() {
   }
 
   modal.hidden = true;
-  console.log("Modal stängd");
+
 }
 
 /**
@@ -546,7 +541,6 @@ function initSunModalEvents(onShowOnMap) {
   const modal = document.getElementById("sun-modal");
 
   if (!modal) {
-    console.log("Ingen sol-modal hittades");
     return;
   }
 
@@ -567,11 +561,8 @@ function initSunModalEvents(onShowOnMap) {
     }
 
     if (!currentModalWeatherPlace) {
-      console.log("Hittade ingen plats för Visa på kartan");
       return;
     }
-
-    console.log("Klick på Visa på kartan:", currentModalWeatherPlace);
 
     if (!currentModalWeatherPlace) {
       return;
@@ -637,7 +628,6 @@ export function initWeather() {
 
       statusMessage.textContent = "Din position hämtades.";
     } catch (error) {
-      console.error("Kunde inte hämta position:", error);
       statusMessage.textContent = error.message || "Något gick fel.";
     }
   });
@@ -677,11 +667,6 @@ export function initWeather() {
         .filter((result) => result.status === "fulfilled")
         .map((result) => result.value);
 
-      console.log("Väderresultat:", weatherResults);
-      console.log("Första platsens forecasts:", weatherResults[0]?.forecasts);
-      console.log("Första platsens laterToday:", weatherResults[0]?.forecasts?.laterToday);
-      console.log("Första platsens tomorrow:", weatherResults[0]?.forecasts?.tomorrow);
-
       /* Filtrera bort dåligt väder, sortera bästa vädret först och döp om platserna i resultatordning */
       const weatherPriority = {
         sunny: 1,
@@ -714,8 +699,6 @@ export function initWeather() {
           return a.distanceKm - b.distanceKm;
         });
 
-      console.log("Filtrerade solplatser:", sunnyPlaces);
-
       /* Spara i state */
       state.weatherData = sunnyPlaces;
 
@@ -730,7 +713,7 @@ export function initWeather() {
         ? `${sunnyPlaces.length} platser med bra väder hittades.`
         : "Ingen plats med bra väder hittades just nu.";
     } catch (error) {
-      console.error("Fel vid submit:", error);
+
       statusMessage.textContent = error.message || "Något gick fel.";
     }
   });
