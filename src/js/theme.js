@@ -1,10 +1,13 @@
-"use strict"
+"use strict";
 
 /**
  * Hanterar val av tema och sparar det i localStorage
  */
 
-// Byter favicon utifrån valt tema
+/**
+ * Byter favicon utifrån valt tema
+ * @param {string} theme
+ */
 function updateFavicon(theme) {
     const favicon = document.getElementById("favicon");
 
@@ -19,6 +22,12 @@ function updateFavicon(theme) {
     favicon.href = icons[theme] || icons.forest;
 }
 
+/**
+ * Initierar temasystemet:
+ * - laddar sparat tema
+ * - sätter tema på body
+ * - kopplar klick på knappar
+ */
 export function initTheme() {
 
     const defaultTheme = "forest";

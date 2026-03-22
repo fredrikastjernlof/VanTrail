@@ -1,4 +1,32 @@
-"use strict"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: map.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: map.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict"
 /* importerar Leaflet-biblioteket och Leaflets egna CSS */
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -30,7 +58,7 @@ export function initMap(mapId = "map", initialView = [62.0, 15.0], initialZoom =
   /* Lägger på kartbakgrunden */
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors"
+    attribution: "&amp;copy; OpenStreetMap contributors"
   }).addTo(map);
   return map;
 }
@@ -101,7 +129,7 @@ function createPoiMarkerIcon(poi) {
 
   return L.divIcon({
     className: "poi-emoji-marker",
-    html: `<div style="font-size: 1.5rem; line-height: 1;">${emoji}</div>`,
+    html: `&lt;div style="font-size: 1.5rem; line-height: 1;">${emoji}&lt;/div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
     popupAnchor: [0, -14]
@@ -139,7 +167,7 @@ export function drawPOIs(pois) {
     }
 
     const name = poi.name || "Namnlös plats";
-    const placeName = poi.placeName ? `<br>${poi.placeName}` : "";
+    const placeName = poi.placeName ? `&lt;br>${poi.placeName}` : "";
     const type = poi.category || poi.type || "Okänd typ";
 
     const marker = L.marker([lat, lon], {
@@ -147,12 +175,12 @@ export function drawPOIs(pois) {
     })
       .addTo(map)
       .bindPopup(`
-        <strong>${name}</strong><br>
+        &lt;strong>${name}&lt;/strong>&lt;br>
         ${type}
-        ${placeName}<br>
-        <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" rel="noopener noreferrer">
+        ${placeName}&lt;br>
+        &lt;a href="https://www.google.com/maps/search/?api=1&amp;query=${lat},${lon}" target="_blank" rel="noopener noreferrer">
           Navigera hit
-        </a>
+        &lt;/a>
       `);
 
     /* Sparar markören med POI:ens id som nyckel */
@@ -209,7 +237,7 @@ function createSunnyPlaceMarkerIcon(place) {
 
   return L.divIcon({
     className: "poi-emoji-marker",
-    html: `<div style="font-size: 1.5rem; line-height: 1;">${emoji}</div>`,
+    html: `&lt;div style="font-size: 1.5rem; line-height: 1;">${emoji}&lt;/div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
     popupAnchor: [0, -14]
@@ -240,12 +268,12 @@ export function drawSunnyPlaces(places) {
     })
       .addTo(map)
       .bindPopup(`
-  <strong>${place.weatherIcon || "☀️"} ${place.name}</strong><br>
-  ${place.forecastGroup ? `${place.forecastGroup}: ` : ""}${place.weatherLabel}<br>
-  ${place.temperature}°C<br>
-  <a href="https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}" target="_blank" rel="noopener noreferrer">
+  &lt;strong>${place.weatherIcon || "☀️"} ${place.name}&lt;/strong>&lt;br>
+  ${place.forecastGroup ? `${place.forecastGroup}: ` : ""}${place.weatherLabel}&lt;br>
+  ${place.temperature}°C&lt;br>
+  &lt;a href="https://www.google.com/maps/search/?api=1&amp;query=${place.lat},${place.lon}" target="_blank" rel="noopener noreferrer">
     Navigera hit
-  </a>
+  &lt;/a>
 `);
 
     poiLayers.set(place.id, marker);
@@ -272,4 +300,26 @@ export function showSunnyPlaceOnMap(place) {
 
   map.setView([place.lat, place.lon], 10);
   marker.openPopup();
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#buildWeatherSnapshot">buildWeatherSnapshot</a></li><li><a href="global.html#closePOIModal">closePOIModal</a></li><li><a href="global.html#closeSunModal">closeSunModal</a></li><li><a href="global.html#createPoiMarkerIcon">createPoiMarkerIcon</a></li><li><a href="global.html#createSunnyPlaceMarkerIcon">createSunnyPlaceMarkerIcon</a></li><li><a href="global.html#detectPoiType">detectPoiType</a></li><li><a href="global.html#drawPOIs">drawPOIs</a></li><li><a href="global.html#drawRoute">drawRoute</a></li><li><a href="global.html#drawSunnyPlaces">drawSunnyPlaces</a></li><li><a href="global.html#fetchOverpassWithFallback">fetchOverpassWithFallback</a></li><li><a href="global.html#fetchPOIs">fetchPOIs</a></li><li><a href="global.html#fetchRoute">fetchRoute</a></li><li><a href="global.html#fetchWeatherForPlace">fetchWeatherForPlace</a></li><li><a href="global.html#filterPOIs">filterPOIs</a></li><li><a href="global.html#generateCandidatePlaces">generateCandidatePlaces</a></li><li><a href="global.html#geocodePlace">geocodePlace</a></li><li><a href="global.html#getActiveFilters">getActiveFilters</a></li><li><a href="global.html#getClosestRouteIndex">getClosestRouteIndex</a></li><li><a href="global.html#getDistanceFromRouteKm">getDistanceFromRouteKm</a></li><li><a href="global.html#getDistanceKm">getDistanceKm</a></li><li><a href="global.html#getHourlyWeatherAtIndex">getHourlyWeatherAtIndex</a></li><li><a href="global.html#getPoiCategory">getPoiCategory</a></li><li><a href="global.html#getPoiMarkerEmoji">getPoiMarkerEmoji</a></li><li><a href="global.html#getPoiPlaceName">getPoiPlaceName</a></li><li><a href="global.html#getRouteLengthKm">getRouteLengthKm</a></li><li><a href="global.html#getSamplePointsByDistance">getSamplePointsByDistance</a></li><li><a href="global.html#getStopListLabel">getStopListLabel</a></li><li><a href="global.html#getSunnyPlaceMarkerEmoji">getSunnyPlaceMarkerEmoji</a></li><li><a href="global.html#getUserPosition">getUserPosition</a></li><li><a href="global.html#getWeatherIcon">getWeatherIcon</a></li><li><a href="global.html#getWeatherLabel">getWeatherLabel</a></li><li><a href="global.html#getWeatherType">getWeatherType</a></li><li><a href="global.html#groupPOIsByCategory">groupPOIsByCategory</a></li><li><a href="global.html#groupSunPlacesByTime">groupSunPlacesByTime</a></li><li><a href="global.html#initMap">initMap</a></li><li><a href="global.html#initPOIModalEvents">initPOIModalEvents</a></li><li><a href="global.html#initSunModalEvents">initSunModalEvents</a></li><li><a href="global.html#initTheme">initTheme</a></li><li><a href="global.html#initWeather">initWeather</a></li><li><a href="global.html#isGoodWeather">isGoodWeather</a></li><li><a href="global.html#limitPOIsPerCategory">limitPOIsPerCategory</a></li><li><a href="global.html#normalizePOIs">normalizePOIs</a></li><li><a href="global.html#openPOIModal">openPOIModal</a></li><li><a href="global.html#openSunModal">openSunModal</a></li><li><a href="global.html#pickEvenlyDistributedPOIs">pickEvenlyDistributedPOIs</a></li><li><a href="global.html#renderStopsGroups">renderStopsGroups</a></li><li><a href="global.html#renderSunResultsList">renderSunResultsList</a></li><li><a href="global.html#showPOIOnMap">showPOIOnMap</a></li><li><a href="global.html#showSunnyPlaceOnMap">showSunnyPlaceOnMap</a></li><li><a href="global.html#sortAndNameSunGroupPlaces">sortAndNameSunGroupPlaces</a></li><li><a href="global.html#sortPOIsAlongRoute">sortPOIsAlongRoute</a></li><li><a href="global.html#updateFavicon">updateFavicon</a></li><li><a href="global.html#updateFilteredPOIView">updateFilteredPOIView</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Sun Mar 22 2026 23:58:07 GMT+0100 (centraleuropeisk normaltid)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
