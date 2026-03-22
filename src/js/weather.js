@@ -77,7 +77,6 @@ function generateCandidatePlaces(center, radiusKm) {
     });
   }
 
-  console.log("Genererade kandidatplatser:", places);
   return places;
 }
 
