@@ -17,8 +17,6 @@ function updateFavicon(theme) {
     };
 
     favicon.href = icons[theme] || icons.forest;
-
-    console.log("Favicon uppdaterad:", theme); 
 }
 
 export function initTheme() {

@@ -7,7 +7,9 @@ import { fetchPOIs, normalizePOIs, groupPOIsByCategory, limitPOIsPerCategory, ge
 import { initMap, drawRoute, drawPOIs, showPOIOnMap } from "./map.js";
 import { geocodePlace, fetchRoute } from "./route.js";
 import { renderStopsGroups, initPOIModalEvents } from "./ui.js";
+import { registerSW } from "virtual:pwa-register";
 
+registerSW({ immediate: true });
 
 /* Startar kartan direkt när sidan laddas */
 initMap();
