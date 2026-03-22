@@ -21,7 +21,6 @@ export function initMap(mapId = "map", initialView = [62.0, 15.0], initialZoom =
 
   /* Om elementet inte finns ska funktionen inte krascha */
   if (!mapElement) {
-    console.log(`[initMap] Hittade inget element med id "${mapId}"`);
     return null;
   }
 
@@ -33,8 +32,6 @@ export function initMap(mapId = "map", initialView = [62.0, 15.0], initialZoom =
     maxZoom: 19,
     attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
-
-  console.log(`[initMap] Karta initierad i #${mapId}`);
   return map;
 }
 
@@ -226,7 +223,6 @@ function createSunnyPlaceMarkerIcon(place) {
  */
 export function drawSunnyPlaces(places) {
   if (!map) {
-    console.log("Ingen karta finns att rita på");
     return;
   }
 
@@ -235,7 +231,6 @@ export function drawSunnyPlaces(places) {
   poiLayers.clear();
 
   if (!places?.length) {
-    console.log("Inga solplatser att rita ut");
     return;
   }
 
@@ -253,7 +248,6 @@ export function drawSunnyPlaces(places) {
     poiLayers.set(place.id, marker);
   });
 
-  console.log("Solmarkörer ritades ut");
 }
 
 
@@ -264,19 +258,15 @@ export function drawSunnyPlaces(places) {
  */
 export function showSunnyPlaceOnMap(place) {
   if (!map || !place) {
-    console.log("Kunde inte visa plats på kartan");
     return;
   }
 
   const marker = poiLayers.get(place.id);
 
   if (!marker) {
-    console.log("Hittade ingen markör för vald plats");
     return;
   }
 
   map.setView([place.lat, place.lon], 10);
   marker.openPopup();
-
-  console.log("Visar plats på kartan:", place.name);
 }
