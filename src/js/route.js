@@ -64,10 +64,8 @@ export async function fetchRoute(startCoords, endCoords) {
     }
   );
 
-  /* Avbryt om API:t inte svaradr korrekt */
+  /* Avbryt om API:t inte svarar korrekt */
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error("ORS-svar:", errorText);
     throw new Error('Kunde inte hämta rutten.');
   }
 

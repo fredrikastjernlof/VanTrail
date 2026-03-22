@@ -27,7 +27,6 @@ export function initTheme() {
             // Spara tema
             localStorage.setItem("vantrail-theme", selectedTheme);
 
-            console.log("Tema valt:", selectedTheme);
         });
     });
 }
