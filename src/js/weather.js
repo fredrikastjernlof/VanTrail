@@ -41,6 +41,52 @@ function getUserPosition() {
 }
 
 /**
+ * Gör om ortnamn till koordinater [lon, lat].
+ *
+ * @param {string} query
+ * @returns {Promise<number[]>}
+ */
+async function geocodePlace(query) {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
+    throw new Error("Skriv in en plats.");
+  }
+
+  const url = new URL("https://nominatim.openstreetmap.org/search");
+  url.searchParams.set("q", trimmedQuery);
+  url.searchParams.set("format", "jsonv2");
+  url.searchParams.set("limit", "1");
+  url.searchParams.set("countrycodes", "se");
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Kunde inte söka efter platsen.");
+  }
+
+  const results = await response.json();
+
+  if (!results.length) {
+    throw new Error("Kunde inte hitta platsen.");
+  }
+
+  const place = results[0];
+  const lat = Number(place.lat);
+  const lon = Number(place.lon);
+
+  if (Number.isNaN(lat) || Number.isNaN(lon)) {
+    throw new Error("Platsen gav ogiltiga koordinater.");
+  }
+
+  return [lon, lat];
+}
+
+/**
  * Skapar kandidatplatser runt en startpunkt.
  *
  * @param {number[]} center
@@ -641,13 +687,14 @@ export function initWeather() {
       const radiusKm = Number(radiusSelect?.value || 200);
 
       let startCoords = null;
+      const startValue = startInput.value.trim();
 
       /* Om användaren redan valt 'Min position' används state */
-      if (startInput.value.trim() === "Min position" && state.userPosition) {
+      if (startValue === "Min position" && state.userPosition) {
         startCoords = state.userPosition;
       } else {
-        /* Tillfällig fallback */
-        startCoords = [15.0, 59.0];
+        statusMessage.textContent = "Söker efter plats...";
+        startCoords = await geocodePlace(startValue);
       }
 
       statusMessage.textContent = "Söker efter soligt väder...";
