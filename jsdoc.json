@@ -1,0 +1,10 @@
+{
+  "source": {
+    "include": ["src/js"],
+    "recurse": true
+  },
+  "opts": {
+    "destination": "public/docs",
+    "readme": "README.md"
+  }
+}

@@ -81,6 +81,10 @@ JSDoc används för att dokumentera funktioner och moduler i projektet.
 
 https://vantrail.netlify.app/docs/
 
+## Projektrapport 📝
+
+[Öppna projektrapporten](Projektrapport.pdf)
+
 ## Det här tar jag med mig från uppgiften ✅🙌
 Det här projektet har gett en djupare förståelse för hur en webbapplikation byggs från grunden utan ramverk. Att kombinera flera API:er till en fungerande helhet var väldigt utmanande och samtidigt också mycket lärorikt, särskilt när det gällde att strukturera koden på ett tydligt sätt.
 
