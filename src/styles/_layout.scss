@@ -90,7 +90,7 @@
   position: relative;
 }
 
-.site-nav li + li::before {
+.site-nav li+li::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -102,13 +102,13 @@
 }
 
 @media (max-width: 768px) {
-  .site-nav li + li::before {
+  .site-nav li+li::before {
     left: calc(var(--space-4xl) / -2);
   }
 }
 
 @media (max-width: 480px) {
-  .site-nav li + li::before {
+  .site-nav li+li::before {
     left: calc(var(--space-xl) / -2);
   }
 }
@@ -223,6 +223,10 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
+}
+
+.page--theme {
+  min-height: calc(100vh - 20rem);
 }
 
 
