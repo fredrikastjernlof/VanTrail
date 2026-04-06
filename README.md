@@ -74,12 +74,12 @@ Applikationen är konfigurerad som en Progressive Web App:
 
 Webbplatsen är publicerad via Netlify:
 
-https://vantrail.netlify.app/ 
+[Öppna webbplatsen](https://vantrail.netlify.app/) 
 
 ## Dokumentation 📄
 JSDoc används för att dokumentera funktioner och moduler i projektet.
 
-https://vantrail.netlify.app/docs/
+[Öppna dokumentationen](https://vantrail.netlify.app/docs/index.html)
 
 ## Projektrapport 📝
 
