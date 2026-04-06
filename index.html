@@ -9,7 +9,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Just+Another+Hand&family=Sometype+Mono:ital,wght@0,400..700;1,400..700&display=swap"
     rel="stylesheet">
-    <link id="favicon" rel="icon" type="image/png" href="/images/favicon_forest.png">
+  <link id="favicon" rel="icon" type="image/png" href="/images/favicon_forest.png">
   <title>VanTrail - Planera din resa</title>
 </head>
 
@@ -72,10 +72,10 @@
 
         <form id="route-form" class="route-form">
           <div class="btn-positioning">
-              <button class="btn-use-location" type="button" id="use-location-btn">
-                📍 Använd min position
-              </button>
-            </div>
+            <button class="btn-use-location" type="button" id="use-location-btn">
+              📍 Använd min position
+            </button>
+          </div>
           <div class="route-form__row">
             <div class="form-field">
               <label class="form-field__label" for="start-input">Startplats:</label>
@@ -126,7 +126,7 @@
             </button>
           </div>
         </form>
-        
+
         <div class="status">
           <p>Status:</p>
           <div id="status-message" class="status-message" aria-live="polite"></div>
@@ -165,6 +165,8 @@
   <footer class="site-footer">
     <div class="container">
       <p>&copy; 2026 VanTrail</p>
+      <p>Denna webbapplikation är skapad av Fredrika Stjernlöf som projektarbete i kursen frontendbaserad webbutveckling, som
+        ingår i webbutvecklingsprogrammet vid Mittuniversitetet i Sundsvall.</p>
     </div>
   </footer>
 
@@ -184,7 +186,7 @@
           Typ: <span id="poi-type"></span>
         </p>
 
-        <p>Ort: <span id="poi-location">Okänd plats</span></p>  <!-- HÄR TESTAR JAG NU-->
+        <p>Ort: <span id="poi-location">Okänd plats</span></p> <!-- HÄR TESTAR JAG NU-->
 
         <p class="poi-card__meta">
           Avstånd från rutten: <span id="poi-distance"></span>
