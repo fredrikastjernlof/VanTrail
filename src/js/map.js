@@ -234,6 +234,8 @@ export function drawSunnyPlaces(places) {
     return;
   }
 
+  const latLngs = [];
+
   places.forEach((place) => {
     const marker = L.marker([place.lat, place.lon], {
       icon: createSunnyPlaceMarkerIcon(place)
@@ -249,14 +251,28 @@ export function drawSunnyPlaces(places) {
 `);
 
     poiLayers.set(place.id, marker);
+
+    /* Spara koordinater så att kartan kan zooma in runt hela området */
+    latLngs.push([place.lat, place.lon]);
   });
 
+  /* Centrera och zooma så alla solplatser syns */
+  if (latLngs.length === 1) {
+    map.setView(latLngs[0], 9);
+    return;
+  }
+
+  const bounds = L.latLngBounds(latLngs);
+  map.fitBounds(bounds, {
+    padding: [40, 40],
+    maxZoom: 9
+  });
 }
 
 
 /**
- * Zoomar till en vald solplats på kartan.
- *
+  * Zoomar kartan till en specifik solplats (t.ex. vid klick i listan/modal)
+ * och öppnar dess popup.
  * @param {object} place
  */
 export function showSunnyPlaceOnMap(place) {
