@@ -8,7 +8,7 @@
     "optimize-images": "node scripts/optimize-images.mjs",
     "build": "npm run optimize-images && vite build",
     "preview": "vite preview",
-    "docs": "jsdoc src/js -d docs"
+    "docs": "jsdoc src/js -d public/docs"
   },
   "devDependencies": {
     "jsdoc": "^4.0.5",
